@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#060D18">
+  <meta name="theme-color" content="#0A1526">
   <title>YoushaLab</title>
 
-  <!-- Inter: light + bold only, matching the brand wordmark -->
+  <!-- Ubuntu is the UI font. Noto Sans Bengali only supplies glyphs if Bengali text appears. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
     /* ============================================================
@@ -23,20 +23,23 @@
       --separator:rgba(255,255,255,0.08);
 
       --text:#F2F5FA;               /* primary */
-      --secondary:rgba(235,240,250,0.6);
-      --tertiary:rgba(235,240,250,0.35);
+      --secondary:rgba(235,240,250,0.72);  /* brighter for reliable sidebar contrast */
+      --tertiary:rgba(235,240,250,0.60);   /* 5.6:1+ on surfaces */
 
-      --accent:#0A84FF;             /* active item, primary buttons, links, charts */
+      --accent:#0A84FF;             /* fills: charts, dots, active row background */
+      --accent-strong:#0071E3;      /* primary button fill: white text = 4.7:1 */
+      --accent-text:#5AA9FF;        /* accent tint for text/icons: 5.8:1+ on dark */
       --green:#30D158;              /* on track / done */
       --yellow:#FFD60A;             /* due within 7 days */
-      --red:#FF453A;                /* overdue */
+      --red:#FF453A;                /* overdue (dots/bars only) */
+      --red-text:#FF6961;           /* red tint for text: 5.3:1+ on elevated */
       --green-soft:rgba(48,209,88,0.12);
       --yellow-soft:rgba(255,214,10,0.12);
       --red-soft:rgba(255,69,58,0.12);
 
-      --header-bg:#FFFFFF;
-      --header-border:#E2E8F0;
-      --navy-text:#0B1A33;
+      --header-bg:#0A1526;
+      --header-border:rgba(255,255,255,0.08);
+      --header-text:#F2F5FA;
 
       --radius-card:12px;
       --radius-input:8px;
@@ -47,7 +50,7 @@
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
     body{
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;
+      font-family:'Ubuntu','Noto Sans Bengali',system-ui,sans-serif;
       font-size:17px;
       line-height:1.45;
       color:var(--text);
@@ -62,6 +65,8 @@
     :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     [hidden]{display:none !important}
     .num{font-variant-numeric:tabular-nums}
+    /* Bengali fallback: only affects explicitly Bangla-tagged content or Bengali glyphs. */
+    :lang(bn),.bn{font-family:'Noto Sans Bengali','Ubuntu',sans-serif}
     .muted{color:var(--secondary)}
     .tertiary{color:var(--tertiary)}
     .small{font-size:13px}
@@ -77,17 +82,17 @@
       display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:40;
     }
     .brand{display:flex;align-items:center;gap:10px}
-    .brand img{height:32px;width:auto;display:block}
+    .brand img{height:28px;width:auto;display:block}
     .brand-name{display:flex;gap:0;white-space:nowrap}
-    .brand-thin{font-weight:300}
+    .brand-thin{font-weight:400}   /* Ubuntu regular — not a hairline */
     .brand-bold{font-weight:700}
-    .brand-thin,.brand-bold{color:var(--navy-text);font-size:22px;letter-spacing:-.02em;line-height:1}
+    .brand-thin,.brand-bold{color:var(--header-text);font-size:22px;letter-spacing:-.015em;line-height:1}
 
     /* ---------- App shell: sidebar + main ---------- */
     .app-shell{display:flex;min-height:calc(100vh - var(--header-h))}
     .sidebar{
       width:var(--sidebar-w);flex:0 0 var(--sidebar-w);
-      background:rgba(10,22,40,0.85);
+      background:rgba(9,19,34,0.96);   /* near-opaque: predictable text contrast */
       -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
       border-right:1px solid var(--separator);
       position:sticky;top:var(--header-h);height:calc(100vh - var(--header-h));
@@ -102,7 +107,7 @@
       transition:background .2s ease,opacity .2s ease,color .2s ease;
     }
     .nav-row:hover{background:var(--surface-hover)}
-    .nav-row.active{background:rgba(10,132,255,0.16);color:var(--accent)}
+    .nav-row.active{background:rgba(10,132,255,0.16);color:var(--accent-text)}
     .nav-row svg{flex:0 0 auto;opacity:.9}
     .sidebar-footer{border-top:1px solid var(--separator);padding:10px 0 calc(10px + env(safe-area-inset-bottom))}
 
@@ -116,7 +121,10 @@
 
     /* ---------- Dashboard grid ---------- */
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;align-items:start}
-    .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+    /* Dashboard: a deliberate 2-column arrangement instead of an auto-fit shuffle */
+    .dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:stretch}
+    .dash-grid .panel-wide{grid-column:1 / -1}
+    .stat-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:20px}
 
     /* ---------- Surfaces ---------- */
     .card,.panel,.inset{
@@ -125,7 +133,7 @@
     .panel{padding:18px}
     .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
     .panel-head h2{font-size:17px;font-weight:600;margin:0;display:flex;align-items:center;gap:9px}
-    .panel-head .panel-icon{color:var(--accent);display:inline-flex}
+    .panel-head .panel-icon{color:var(--accent-text);display:inline-flex}
     .inkset{background:transparent}
 
     .inset{overflow:hidden}
@@ -152,15 +160,15 @@
       transition:background .2s ease,opacity .2s ease,transform .1s ease;
     }
     .btn:active,.tappable:active,.nav-row:active,.tab:active,.inset-row:active,.step-btn:active{opacity:.6}
-    .btn.primary{background:var(--accent);color:#fff}
-    .btn.primary:hover{background:#339BFF}
+    .btn.primary{background:var(--accent-strong);color:#fff}
+    .btn.primary:hover{background:#0067D1}
     .btn.ghost{background:rgba(255,255,255,0.06);border-color:var(--separator);color:var(--text)}
     .btn.ghost:hover{background:var(--surface-hover)}
-    .btn.danger{background:var(--red-soft);color:var(--red);border-color:rgba(255,69,58,0.25)}
+    .btn.danger{background:var(--red-soft);color:var(--red-text);border-color:rgba(255,69,58,0.25)}
     .btn.small{min-height:30px;padding:5px 10px;font-size:13px}
     .btn.block{width:100%}
     .link-btn{
-      background:none;border:0;color:var(--accent);font-size:14px;font-weight:600;
+      background:none;border:0;color:var(--accent-text);font-size:14px;font-weight:600;
       padding:6px 2px;transition:opacity .2s ease;
     }
     .link-btn:hover{text-decoration:underline}
@@ -188,7 +196,7 @@
       border-radius:var(--radius-input);padding:10px 12px;font-size:16px;color:var(--text);
     }
     textarea{min-height:86px;resize:vertical}
-    .form-error{color:var(--red);font-size:13px;min-height:18px;margin-top:2px}
+    .form-error{color:var(--red-text);font-size:13px;min-height:18px;margin-top:2px}
     .form-notice{color:var(--green);font-size:13px;margin:4px 0}
 
     /* iOS segmented control */
@@ -219,7 +227,7 @@
     .countdown{font-size:13px;font-weight:600;white-space:nowrap}
     .countdown.ok{color:var(--green)}
     .countdown.warn{color:var(--yellow)}
-    .countdown.bad{color:var(--red)}
+    .countdown.bad{color:var(--red-text)}
 
     /* Stat tiles */
     .tile{
@@ -260,7 +268,7 @@
     }
     .subject-head:hover{background:var(--surface-hover)}
     .subject-name{font-weight:600;flex:1;font-size:16px}
-    .subject-pct{color:var(--accent);font-weight:700}
+    .subject-pct{color:var(--accent-text);font-weight:700}
     .chev{display:inline-flex;color:var(--tertiary);transition:transform .2s ease}
     .chev.open{transform:rotate(90deg)}
     .card-body{padding:0 16px 16px;border-top:1px solid var(--separator)}
@@ -270,14 +278,14 @@
     .chapter-head{display:flex;align-items:center;gap:8px;padding:11px 12px;cursor:pointer;transition:background .2s ease,opacity .2s ease}
     .chapter-head:hover{background:var(--surface-hover)}
     .chapter-name{flex:1;font-size:15px}
-    .number-pill{font-size:12px;color:var(--accent);background:rgba(10,132,255,0.16);padding:2px 8px;border-radius:6px;margin-right:4px}
+    .number-pill{font-size:12px;color:var(--accent-text);background:rgba(10,132,255,0.16);padding:2px 8px;border-radius:6px;margin-right:4px}
     .chapter-body{padding:4px 12px 12px;border-top:1px solid var(--separator)}
     .qtype{padding:10px 0;border-bottom:1px solid var(--separator)}
     .qtype:last-of-type{border-bottom:0}
     .qtype-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
     .qtype-target{font-size:13px;color:var(--secondary);margin-left:-4px}
     .stepper{display:inline-flex;align-items:center;gap:2px;background:var(--elevated);border:1px solid var(--separator);border-radius:8px;overflow:hidden}
-    .step-btn{width:30px;height:28px;border:0;background:transparent;color:var(--accent);font-size:18px;line-height:1;transition:background .2s ease,opacity .2s ease}
+    .step-btn{width:30px;height:28px;border:0;background:transparent;color:var(--accent-text);font-size:18px;line-height:1;transition:background .2s ease,opacity .2s ease}
     .step-btn:hover{background:var(--surface-hover)}
     .step-val{min-width:26px;text-align:center;font-size:14px;font-weight:600}
     .stepper.target{margin-left:auto}
@@ -288,14 +296,31 @@
     .practical-row.done .name{text-decoration:line-through;color:var(--tertiary)}
     .practical-row .date{font-size:13px;color:var(--secondary)}
 
-    /* iOS switch */
-    .switch{position:relative;display:inline-flex;flex:0 0 auto;cursor:pointer}
-    .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
-    .switch-track{width:44px;height:26px;border-radius:99px;background:rgba(255,255,255,0.16);transition:background .2s ease;position:relative}
-    .switch-thumb{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .2s ease}
-    .switch input:checked+.switch-track{background:var(--green)}
-    .switch input:checked+.switch-track .switch-thumb{transform:translateX(18px)}
-    .switch input:focus-visible+.switch-track{outline:2px solid var(--accent);outline-offset:2px}
+    /* Tick-style checkbox — a real checkmark, not a button or switch */
+    .tick{position:relative;display:inline-flex;width:24px;height:24px;flex:0 0 auto;cursor:pointer}
+    .tick input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+    .tick-box{
+      width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+      background:var(--elevated);border:1.5px solid rgba(255,255,255,0.28);
+      transition:background .15s ease,border-color .15s ease;
+    }
+    .tick-box svg{width:15px;height:15px;opacity:0;transition:opacity .15s ease}
+    .tick input:checked+.tick-box{background:var(--accent-strong);border-color:var(--accent-strong)}
+    .tick input:checked+.tick-box svg{opacity:1}
+    .tick input:focus-visible+.tick-box{outline:2px solid var(--accent);outline-offset:2px}
+
+    /* ---------- Practicals: one group per subject ---------- */
+    .prac-group{padding:16px}
+    .prac-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .prac-head .prac-name{font-size:17px;font-weight:600}
+    .prac-head .prac-count{font-size:13px;color:var(--secondary)}
+    .prac-total{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--secondary);margin-bottom:10px}
+    .prac-total .num{color:var(--text);font-weight:600}
+    .prac-detail-info{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;font-size:13px;color:var(--secondary)}
+    .completed-badge{font-size:11px;font-weight:600;color:var(--green);letter-spacing:.03em}
+    .chapter-tracker-body{display:flex;align-items:center;gap:22px;padding:6px 2px}
+    .tracker-big{font-size:24px;font-weight:700;line-height:1.2}
+    .tracker-sub{font-size:13px;color:var(--secondary);margin-top:4px}
 
     /* ---------- Cards for projects / competitions / achievements ---------- */
     .item-card{padding:16px}
@@ -304,7 +329,7 @@
     .item-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
     .item-notes{font-size:14px;color:var(--secondary);margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
     .item-link{font-size:13px;margin-top:10px}
-    .item-link a{color:var(--accent);text-decoration:none;overflow-wrap:anywhere}
+    .item-link a{color:var(--accent-text);text-decoration:none;overflow-wrap:anywhere}
     .item-link a:hover{text-decoration:underline}
     .divider-label{
       font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tertiary);
@@ -315,7 +340,27 @@
     .task input{width:18px;height:18px;accent-color:var(--accent);flex:0 0 auto}
     .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
     .tag{font-size:12px;color:var(--secondary);background:rgba(255,255,255,0.05);border:1px solid var(--separator);padding:2px 8px;border-radius:6px}
-    .achievement-list{display:grid;gap:14px}
+    /* ---------- Achievements: prize gallery ---------- */
+    .achievement-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+    .prize-card{
+      position:relative;padding:22px 18px 18px;text-align:center;overflow:hidden;
+      background:var(--surface);border:1px solid var(--separator);border-radius:var(--radius-card);
+    }
+    .prize-card::before{
+      content:"";position:absolute;inset:6px;border:1px solid rgba(255,255,255,0.06);
+      border-radius:8px;pointer-events:none;
+    }
+    .prize-medal{
+      width:58px;height:58px;margin:0 auto 14px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:var(--surface-hover);border:1px solid rgba(10,132,255,0.35);color:var(--accent-text);
+    }
+    .prize-year{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tertiary)}
+    .prize-title{font-size:17px;font-weight:700;margin:5px 0 4px;line-height:1.3;overflow-wrap:anywhere}
+    .prize-org{font-size:13px;color:var(--secondary)}
+    .prize-desc{font-size:13px;color:var(--secondary);margin:12px 4px 0;line-height:1.5}
+    .prize-card .tags,.prize-card .item-link{position:relative;justify-content:center;display:flex}
+    .prize-card .row-actions{position:absolute;top:10px;right:10px}
 
     /* ---------- Bottom tab bar (phones) ---------- */
     .tabbar{display:none}
@@ -326,7 +371,7 @@
       width:100%;max-width:380px;background:var(--surface);border:1px solid var(--separator);
       border-radius:var(--radius-card);padding:28px 24px;
     }
-    .auth-icon{display:inline-flex;color:var(--accent);margin-bottom:12px}
+    .auth-icon{display:inline-flex;color:var(--accent-text);margin-bottom:12px}
     .auth-card h1{font-size:24px;margin:0;font-weight:700}
     .auth-card>p{margin:6px 0 22px;font-size:14px}
     .auth-card .btn{margin-top:14px}
@@ -352,7 +397,7 @@
     }
     .sheet-head h2{font-size:16px;font-weight:600;margin:0;text-align:center}
     .sheet-side{background:none;border:0;color:var(--secondary);font-size:15px;padding:6px 0;transition:opacity .2s ease}
-    .sheet-side.save{color:var(--accent);font-weight:600;text-align:right}
+    .sheet-side.save{color:var(--accent-text);font-weight:600;text-align:right}
     .sheet-side:active{opacity:.6}
     .sheet form{padding:18px 16px 24px}
     .sheet .action-body{padding:8px 16px 20px}
@@ -362,24 +407,29 @@
     .error-banner{
       display:flex;align-items:center;justify-content:space-between;gap:12px;
       background:var(--red-soft);border-bottom:1px solid rgba(255,69,58,0.3);
-      color:var(--red);padding:10px 16px;font-size:14px;z-index:35;
+      color:var(--red-text);padding:10px 16px;font-size:14px;z-index:35;
     }
-    .error-banner button{background:none;border:0;color:var(--red);display:inline-flex;padding:4px}
+    .error-banner button{background:none;border:0;color:var(--red-text);display:inline-flex;padding:4px}
     #toast-root{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;z-index:80;pointer-events:none}
     .toast{
       background:var(--elevated);border:1px solid var(--separator);color:var(--text);
       padding:11px 16px;border-radius:10px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.4);
       animation:toast-in .2s ease;
     }
-    .toast.error{color:var(--red)}
+    .toast.error{color:var(--red-text)}
     @keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
     /* ---------- Responsive: phones ---------- */
+    @media (min-width:761px) and (max-width:1100px){
+      .stat-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
     @media (max-width:760px){
       :root{--header-h:52px}
       .sidebar{display:none}
       .main{padding:20px 16px calc(96px + env(safe-area-inset-bottom))}
       .grid{grid-template-columns:1fr;gap:16px}
+      .dash-grid{grid-template-columns:1fr;gap:16px}
+      .dash-grid .panel-wide{grid-column:auto}
       .stat-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
       .section-head{align-items:flex-start}
       .head-actions{width:100%}
@@ -397,7 +447,7 @@
         min-height:58px;background:none;border:0;color:var(--secondary);font-size:10px;
         transition:opacity .2s ease,color .2s ease;
       }
-      .tab.active{color:var(--accent)}
+      .tab.active{color:var(--accent-text)}
       .tab span{font-size:10px}
 
       .sheet-backdrop{align-items:flex-end;padding:0}
@@ -483,6 +533,7 @@
 
         <div class="group-label">Work</div>
         <button class="nav-row" data-action="tab" data-tab="study"></button>
+        <button class="nav-row" data-action="tab" data-tab="practicals"></button>
         <button class="nav-row" data-action="tab" data-tab="projects"></button>
         <button class="nav-row" data-action="tab" data-tab="competitions"></button>
         <button class="nav-row" data-action="tab" data-tab="achievements"></button>
@@ -528,12 +579,22 @@
   // Capture a recovery link before Supabase exchanges (and strips) the URL hash.
   const RECOVERY_LINK = /type=recovery|access_token/.test(window.location.hash || '');
 
+  // Fail loudly if the CDN script is blocked instead of hanging on "Restoring session…".
+  if(!window.supabase){
+    document.getElementById('boot-screen').hidden = true;
+    document.getElementById('login-screen').hidden = false;
+    document.getElementById('error-text').textContent = 'Could not load the Supabase library. Check your connection and reload the page.';
+    document.getElementById('error-banner').hidden = false;
+    throw new Error('Supabase library unavailable');
+  }
   const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_PUBLISHABLE_KEY);
 
   /* ---------- Tiny helpers ---------- */
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  // Only allow http(s) links in href attributes (blocks javascript: URLs).
+  const safeUrl = v => { const s = String(v || '').trim(); return /^https?:\/\//i.test(s) ? esc(s) : ''; };
   const num = v => { const n = Number(v); return isFinite(n) ? n : 0; };
   const clamp = n => Math.max(0, Math.min(100, num(n)));
   const cap = s => s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '';
@@ -595,6 +656,7 @@
   function icon(name, size = 20){
     return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON_PATHS[name] || '') + '</svg>';
   }
+  const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
 
   /* ---------- Chart primitives (SVG donut + thin bar) ---------- */
   function donut(pct, opts = {}){
@@ -621,7 +683,7 @@
     activeTab:'dashboard',
     loading:true,
     recoveryMode:RECOVERY_LINK,
-    search:{study:'',projects:'',competitions:'',achievements:''},
+    search:{study:'',practicals:'',projects:'',competitions:'',achievements:''},
     expanded:{subjects:new Set(),chapters:new Set()},
     achFilter:{category:'',year:''}
   };
@@ -707,14 +769,36 @@
     else toast('Reset link sent. Check your inbox.');
   }
 
+  // Keep "Wrong password" for the common case, but surface every other auth error
+  // (missing account, unconfirmed email, rate limit, network) instead of hiding it.
+  let signingIn = false;
   $('#login-form').addEventListener('submit', async e => {
     e.preventDefault();
+    if(signingIn) return;
+    signingIn = true;
     const pass = $('#login-password').value;
     const err = $('#login-error'); err.textContent = '';
     $('#login-notice').hidden = true;
-    const {error} = await supabase.auth.signInWithPassword({email:CONFIG.LOGIN_EMAIL,password:pass});
-    if(error){ err.textContent = 'Wrong password'; }
-    else { $('#login-password').value = ''; }
+    clearError();
+    try{
+      const {error} = await supabase.auth.signInWithPassword({email:CONFIG.LOGIN_EMAIL,password:pass});
+      if(error){
+        console.warn('[YoushaLab] sign-in error:', error);
+        const msg = error.message || '';
+        if(error.code === 'invalid_credentials' || /invalid login credentials/i.test(msg)){
+          err.textContent = 'Wrong password';
+        }else{
+          err.textContent = 'Sign in failed: ' + msg;
+          showError('Sign in failed: ' + (error.code ? error.code + ' — ' : '') + msg);
+        }
+      }else{
+        $('#login-password').value = '';
+      }
+    }catch(ex){
+      console.warn('[YoushaLab] sign-in exception:', ex);
+      showError('Sign in failed: ' + (ex.message || 'Network error. Check your connection.'));
+      err.textContent = 'Could not reach the server.';
+    }finally{ signingIn = false; }
   });
   $('#recovery-form').addEventListener('submit', async e => {
     e.preventDefault();
@@ -742,43 +826,74 @@
     state.loading = false;
     renderCurrent();
   }
-  async function saveEntry(payload, id){
-    try{
-      if(id){
-        const {error} = await supabase.from('entries').update(payload).eq('id', id).eq('user_id', state.user.id);
-        if(error) throw error;
-      }else{
-        const {error} = await supabase.from('entries').insert(Object.assign({user_id:state.user.id}, payload));
-        if(error) throw error;
+  // Re-render the active section instantly, preserving a focused search field.
+  function quickRender(){
+    const active = document.activeElement;
+    const key = active && active.dataset ? active.dataset.search : null;
+    const caret = key ? active.selectionStart : null, value = key ? active.value : null;
+    renderCurrent();
+    if(key){
+      const el = document.querySelector('[data-search="' + key + '"]');
+      if(el){
+        el.focus();
+        if(value !== null) el.value = value;
+        if(caret !== null){ try{ el.setSelectionRange(caret,caret); }catch(_){} }
       }
-      closeSheet();
-      toast(id ? 'Changes saved' : 'Added');
-      await refreshData();
-    }catch(err){ showError('Could not save: ' + (err.message || err)); }
+    }
   }
-  // Patch only the jsonb column (used by quick steppers, switches and checklists).
+  // Background write: the UI has already updated; only refetch if the write fails.
+  function persist(id, data){
+    patchData(id,data).catch(err => { showError('Could not update: ' + (err.message || err)); refreshData(); });
+  }
+  // Edits apply locally at once; inserts use a single round trip with no full refetch.
+  function saveEntry(payload, id){
+    if(id){
+      const e = byId(id);
+      if(e) Object.assign(e,payload);
+      closeSheet(); quickRender(); toast('Changes saved');
+      supabase.from('entries').update(payload).eq('id',id).eq('user_id',state.user.id)
+        .then(({error}) => { if(error) throw error; })
+        .catch(err => { showError('Could not save: ' + (err.message || err)); refreshData(); });
+    }else{
+      closeSheet();
+      supabase.from('entries').insert(Object.assign({user_id:state.user.id},payload)).select().single()
+        .then(({data,error}) => {
+          if(error) throw error;
+          if(data && data.id && !byId(data.id)) state.entries.push(data);
+          quickRender(); toast('Added');
+        })
+        .catch(err => { showError('Could not save: ' + (err.message || err)); refreshData(); });
+    }
+  }
   async function patchData(id, data){
     const {error} = await supabase.from('entries').update({data:data}).eq('id', id).eq('user_id', state.user.id);
     if(error) throw error;
   }
-  async function removeEntry(id){
+  function removeEntry(id){
     if(!window.confirm('Delete this item? This cannot be undone.')) return;
-    try{
-      // Delete children first so chapters/practicals are never orphaned.
-      let r = await supabase.from('entries').delete().eq('parent_id', id).eq('user_id', state.user.id);
-      if(r.error) throw r.error;
-      r = await supabase.from('entries').delete().eq('id', id).eq('user_id', state.user.id);
-      if(r.error) throw r.error;
-      toast('Deleted');
-      await refreshData();
-    }catch(err){ showError('Could not delete: ' + (err.message || err)); }
+    const children = state.entries.filter(x => x.parent_id === id).map(x => x.id);
+    state.entries = state.entries.filter(x => x.id !== id && x.parent_id !== id);
+    if(pracDetailSubjectId === id) closeSheet();
+    else { quickRender(); reopenPracticalDetail(); }
+    const del = tid => supabase.from('entries').delete().eq('id',tid).eq('user_id',state.user.id);
+    Promise.all(children.map(del).concat([del(id)]))
+      .then(results => { const bad = results.find(r => r && r.error); if(bad) throw bad.error; toast('Deleted'); })
+      .catch(err => { showError('Could not delete: ' + (err.message || err)); refreshData(); });
   }
 
   /* ---------- Computed progress ---------- */
+  // A chapter has three tickable parts. All three ticked = chapter completed.
   function chapterStats(ch){
-    const d = ch.data || {}; let target = 0, done = 0;
-    ['cq','mcq','short'].forEach(t => { target += num(d[t] && d[t].target); done += num(d[t] && d[t].done); });
-    return {target,done,pct:target ? clamp(done / target * 100) : 0};
+    const d = ch.data || {};
+    const parts = {cq:!!d.cq, mcq:!!d.mcq, short:!!d.short};
+    const done = ['cq','mcq','short'].filter(k => parts[k]).length;
+    return {parts,target:3,done,pct:clamp(done / 3 * 100),complete:done === 3};
+  }
+  // Total chapters finished across every subject (for the dashboard tracker).
+  function chapterCompletion(){
+    const chapters = state.entries.filter(e => e.section === 'chapter');
+    const done = chapters.filter(ch => chapterStats(ch).complete).length;
+    return {done,total:chapters.length,pct:chapters.length ? clamp(done / chapters.length * 100) : 0};
   }
   function subjectStats(s){
     const chapters = kids(s.id, 'chapter');
@@ -790,17 +905,18 @@
     return {chapters,practicals,target,done,pct:target ? clamp(done / target * 100) : 0,doneCount,total,
       practicalPct:total ? clamp(doneCount / total * 100) : 0};
   }
+  // Average of subject completion percentages (distinct from the aggregate tracker).
   function overallStudyPct(){
-    let t = 0, d = 0;
-    state.entries.filter(e => e.section === 'chapter').forEach(ch => { const st = chapterStats(ch); t += st.target; d += st.done; });
-    return t ? clamp(d / t * 100) : 0;
+    const subjects = state.entries.filter(e => e.section === 'subject');
+    if(!subjects.length) return 0;
+    return clamp(subjects.reduce((a,s) => a + subjectStats(s).pct, 0) / subjects.length);
   }
-  // Aggregate the three question types across a subject's chapters.
+  // Aggregate tick counts per question type across a subject's chapters.
   function questionTotals(st){
     const agg = {cq:{t:0,d:0},mcq:{t:0,d:0},short:{t:0,d:0}};
     st.chapters.forEach(ch => {
-      const d = ch.data || {};
-      ['cq','mcq','short'].forEach(k => { agg[k].t += num(d[k] && d[k].target); agg[k].d += num(d[k] && d[k].done); });
+      const parts = chapterStats(ch).parts;
+      ['cq','mcq','short'].forEach(k => { agg[k].t += 1; if(parts[k]) agg[k].d += 1; });
     });
     return agg;
   }
@@ -816,7 +932,7 @@
         add(e.date,(e.title || 'Chapter') + ' · target','chapter','study',e.id);
         if(e.data && e.data.exam) add(e.data.exam,(e.title || 'Chapter') + ' · exam','exam','study',e.id);
       }
-      if(e.section === 'practical') add(e.date,(e.title || 'Practical') + ' · practical','practical','study',e.id);
+      if(e.section === 'practical') add(e.date,(e.title || 'Practical') + ' · practical','practical','practicals',e.id);
       if(e.section === 'project') add(e.date,(e.title || 'Project') + ' · deadline','project','projects',e.id);
       if(e.section === 'competition'){
         add(e.date,(e.title || 'Competition') + ' · submission','competition','competitions',e.id);
@@ -828,10 +944,11 @@
 
   /* ---------- Navigation ---------- */
   const NAV = [
-    {tab:'dashboard',label:'Dashboard',icon:'grid'},
-    {tab:'study',label:'Study',icon:'book'},
-    {tab:'projects',label:'Science Projects',short:'Projects',icon:'flask'},
-    {tab:'competitions',label:'Competitions',icon:'flag'},
+    {tab:'dashboard',label:'Dashboard',icon:'grid',tabbar:true},
+    {tab:'study',label:'Study',icon:'book',tabbar:true},
+    {tab:'practicals',label:'Practicals',icon:'list'},
+    {tab:'projects',label:'Science Projects',short:'Projects',icon:'flask',tabbar:true},
+    {tab:'competitions',label:'Competitions',icon:'flag',tabbar:true},
     {tab:'achievements',label:'Achievements',icon:'award'},
     {tab:'settings',label:'Settings',icon:'settings'}
   ];
@@ -842,7 +959,7 @@
     });
     $('.sidebar-footer .nav-row').innerHTML = icon('logout',19) + '<span>Logout</span>';
     const tabs = $$('.tabbar .tab');
-    NAV.slice(0,4).forEach((n,i) => { tabs[i].innerHTML = icon(n.icon,22) + '<span>' + (n.short || n.label) + '</span>'; });
+    NAV.filter(n => n.tabbar).forEach((n,i) => { tabs[i].innerHTML = icon(n.icon,22) + '<span>' + (n.short || n.label) + '</span>'; });
     tabs[4].innerHTML = icon('more',22) + '<span>More</span>';
     $('#login-icon').innerHTML = icon('lock',28);
     $('#recovery-icon').innerHTML = icon('lock',28);
@@ -877,7 +994,7 @@
   }
   function renderCurrent(){
     if(!state.user) return;
-    ({dashboard:renderDashboard,study:renderStudy,projects:renderProjects,
+    ({dashboard:renderDashboard,study:renderStudy,practicals:renderPracticals,projects:renderProjects,
       competitions:renderCompetitions,achievements:renderAchievements,settings:renderSettings}[state.activeTab] || renderDashboard)();
   }
 
@@ -927,7 +1044,7 @@
         '</div>' +
       '</div>';
   }
-  function closeSheet(){ $('#sheet-root').innerHTML = ''; modalSubmit = null; }
+  function closeSheet(){ $('#sheet-root').innerHTML = ''; modalSubmit = null; pracDetailSubjectId = null; }
   function emptyState(msg, action, label){
     return '<div class="empty"><div>' + esc(msg) + '</div><button class="link-btn" data-action="' + action + '">' + esc(label) + '</button></div>';
   }
@@ -945,7 +1062,7 @@
   function skeletonDashboard(){
     let s = '<div class="skeleton sk-line" style="width:220px;height:30px"></div><div class="skeleton sk-line" style="width:300px"></div><div class="stat-row">';
     for(let i=0;i<5;i++) s += '<div class="skeleton sk-stat"></div>';
-    s += '</div><div class="grid">';
+    s += '</div><div class="dash-grid">';
     for(let i=0;i<4;i++) s += '<div class="panel"><div class="skeleton sk-line" style="width:45%"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line" style="width:80%"></div></div>';
     return s + '</div>';
   }
@@ -967,39 +1084,39 @@
     let html = '<div class="section-head"><div><h1 class="large-title">Good ' + greeting + '</h1>' +
       '<p class="section-sub">' + esc(today) + ' · <span class="num">' + dueWeek + '</span> item' + (dueWeek === 1 ? '' : 's') + ' due this week</p></div></div>';
 
-    // Summary row: five compact tiles, each with a small donut + value.
+    // Summary row: compact tiles, each with a small donut + value.
     const overall = overallStudyPct();
+    const chapters = chapterCompletion();
     const projAvg = projects.length ? projects.reduce((a,p) => a + num(STAGE_PCT[(p.data||{}).stage]), 0) / projects.length : 0;
     const activeComps = competitions.filter(c => (c.data||{}).status !== 'result');
     const nextComp = activeComps.slice().sort((a,b) => (daysLeft(a.date) ?? 9999) - (daysLeft(b.date) ?? 9999))[0];
-    let pracDone = 0, pracTotal = 0;
-    subjects.forEach(s => { const st = subjectStats(s); pracDone += st.doneCount; pracTotal += st.total; });
-    const pracPct = pracTotal ? clamp(pracDone / pracTotal * 100) : 0;
 
     html += '<div class="stat-row">' +
-      statTile('Study progress',Math.round(overall) + '%','across all chapters',overall,Math.round(overall) + '%') +
+      statTile('Chapters completed',chapters.done + ' of ' + chapters.total,'all subjects finished',chapters.pct,Math.round(chapters.pct) + '%') +
+      statTile('Study progress',Math.round(overall) + '%','average by subject',overall,Math.round(overall) + '%') +
       statTile('Projects average',Math.round(projAvg) + '%',projects.length + ' project' + (projects.length === 1 ? '' : 's'),projAvg,Math.round(projAvg) + '%') +
       statTile('Active competitions',String(activeComps.length),nextComp ? 'Next: ' + esc(nextComp.title) : 'No deadlines',nextComp ? num(STATUS_PCT[(nextComp.data||{}).status]) : 0,String(activeComps.length)) +
-      statTile('Practicals done',pracDone + ' of ' + pracTotal,'planned practicals',pracPct,String(pracDone)) +
       statTile('Achievements',String(achievements.length),'recorded all time',achievements.length ? 100 : 0,String(achievements.length)) +
-      '</div><div class="grid">';
+      '</div><div class="dash-grid">';
 
-    // Study progress — weakest subject first, donut + CQ/MCQ/Short bars + practicals bar.
+    // Dedicated chapter-completion tracker across every subject.
+    html += '<section class="panel panel-wide"><div class="panel-head"><h2><span class="panel-icon">' + icon('list',18) + '</span> Chapters completed</h2></div>' +
+      '<div class="chapter-tracker-body">' + donut(chapters.pct,{size:96,stroke:6,label:Math.round(chapters.pct) + '%',fontSize:16}) +
+      '<div><div class="tracker-big num">' + chapters.done + ' out of ' + chapters.total + '</div>' +
+      '<div class="tracker-sub">chapters completed across all subjects</div></div></div></section>';
+
+    // Study progress — weakest subject first, donut + chapter completion.
     html += '<section class="panel"><div class="panel-head"><h2><span class="panel-icon">' + icon('book',18) + '</span> Study progress</h2><button class="link-btn" data-action="tab" data-tab="study">Manage</button></div>';
     if(!subjects.length){
       html += emptyState('No subjects yet. Add your first one to begin.','add-subject','+ Add subject');
     }else{
       html += '<div class="inset">' + subjects.slice().sort((a,b) => subjectStats(a).pct - subjectStats(b).pct).map(s => {
-        const st = subjectStats(s), agg = questionTotals(st);
+        const st = subjectStats(s);
+        const finished = st.chapters.filter(ch => chapterStats(ch).complete).length;
         return '<div class="inset-row tappable" data-action="goto" data-tab="study" data-id="' + s.id + '">' +
           '<div style="width:100%"><div class="study-top"><span class="study-name">' + esc(s.title) + '</span>' + donut(st.pct,{size:44,stroke:5,label:Math.round(st.pct) + '%'}) + '</div>' +
-          '<div class="qbars">' + ['cq','mcq','short'].map(k => {
-            const label = k === 'cq' ? 'CQ' : k === 'mcq' ? 'MCQ' : 'Short';
-            const pct = agg[k].t ? clamp(agg[k].d / agg[k].t * 100) : 0;
-            return '<div><div class="qline-head"><span>' + label + '</span><span class="num">' + agg[k].d + ' / ' + agg[k].t + '</span></div>' + bar(pct,{height:4}) + '</div>';
-          }).join('') +
-          '<div><div class="qline-head"><span>Practicals</span><span class="num">' + st.doneCount + ' of ' + st.total + ' practicals done</span></div>' + bar(st.practicalPct,{height:4}) + '</div>' +
-          '</div></div></div>';
+          '<div class="qbars"><div><div class="qline-head"><span>Chapters completed</span><span class="num">' + finished + ' of ' + st.chapters.length + '</span></div>' + bar(st.pct,{height:4}) + '</div></div>' +
+          '</div></div>';
       }).join('') + '</div>';
     }
     html += '</section>';
@@ -1048,7 +1165,7 @@
     html += '</section>';
 
     // Achievements — 3 most recent + category counts as secondary labels.
-    html += '<section class="panel"><div class="panel-head"><h2><span class="panel-icon">' + icon('award',18) + '</span> Achievements</h2><button class="link-btn" data-action="tab" data-tab="achievements">Manage</button></div>';
+    html += '<section class="panel panel-wide"><div class="panel-head"><h2><span class="panel-icon">' + icon('award',18) + '</span> Achievements</h2><button class="link-btn" data-action="tab" data-tab="achievements">Manage</button></div>';
     if(!achievements.length){
       html += emptyState('No achievements yet. Record your first win.','add-achievement','+ Add achievement');
     }else{
@@ -1077,8 +1194,7 @@
     const q = state.search.study.trim().toLowerCase();
     let subjects = state.entries.filter(e => e.section === 'subject');
     if(q) subjects = subjects.filter(s => s.title.toLowerCase().includes(q) ||
-      kids(s.id,'chapter').some(c => c.title.toLowerCase().includes(q)) ||
-      kids(s.id,'practical').some(p => p.title.toLowerCase().includes(q)));
+      kids(s.id,'chapter').some(c => c.title.toLowerCase().includes(q)));
     const root = $('#study-list'); if(!root) return;
     if(!subjects.length){ root.innerHTML = emptyState(q ? 'No subjects match your search.' : 'No subjects yet. Add your first subject.','add-subject','+ Add subject'); return; }
 
@@ -1089,16 +1205,7 @@
         '<span class="subject-name">' + esc(s.title) + '</span><span class="subject-pct num">' + Math.round(st.pct) + '%</span></div>';
       if(open){
         h += '<div class="card-body">' +
-          '<div class="subblock"><div class="subblock-title"><span>Overall questions</span><span class="num">' + st.done + ' / ' + st.target + '</span></div>' + bar(st.pct) + '</div>' +
-
-          '<div class="subblock"><div class="subblock-title"><span>Practicals · ' + st.doneCount + ' of ' + st.total + ' done</span><button class="link-btn" data-action="add-practical" data-id="' + s.id + '">+ Practical</button></div>' + bar(st.practicalPct) +
-          '<div style="margin-top:10px">' + (st.practicals.length ? st.practicals.sort((a,b) => (a.date || '').localeCompare(b.date || '')).map(p => {
-            const done = !!(p.data && p.data.done);
-            return '<div class="practical-row' + (done ? ' done' : '') + '">' +
-              '<label class="switch" aria-label="Mark practical done"><input type="checkbox" data-action="toggle-practical" data-id="' + p.id + '"' + (done ? ' checked' : '') + '><span class="switch-track"><span class="switch-thumb"></span></span></label>' +
-              '<span class="name">' + esc(p.title) + '</span><span class="date">' + esc(fmtDate(p.date)) + '</span>' +
-              '<span class="row-actions">' + editBtn('edit-practical',p.id) + delBtn(p.id) + '</span></div>';
-          }).join('') : '<div class="muted small" style="padding:8px 0">No practicals added.</div>') + '</div></div>' +
+          '<div class="subblock"><div class="subblock-title"><span>Chapters completed</span><span class="num">' + st.chapters.filter(ch => chapterStats(ch).complete).length + ' of ' + st.chapters.length + '</span></div>' + bar(st.pct) + '</div>' +
 
           '<div class="subblock"><div class="subblock-title"><span>Chapters (' + st.chapters.length + ')</span><button class="link-btn" data-action="add-chapter" data-id="' + s.id + '">+ Chapter</button></div>' +
           (st.chapters.length ? st.chapters.sort((a,b) => num((a.data||{}).number) - num((b.data||{}).number)).map(renderChapter).join('') : '<div class="muted small" style="padding:8px 0">No chapters added yet.</div>') + '</div>' +
@@ -1109,24 +1216,104 @@
       return h + '</div>';
     }).join('');
   }
+  /* ==========================================================================
+     PRACTICALS — subject overview only; manage inside the subject box
+     ========================================================================== */
+  let pracDetailSubjectId = null;
+
+  function renderPracticals(){
+    $('#section-root').innerHTML =
+      '<div class="section-head"><div><h1 class="large-title">Practicals</h1><p class="section-sub">Tap a subject to manage its practical list</p></div>' +
+      '<div class="head-actions"><input class="search" data-search="practicals" placeholder="Search subjects…" value="' + esc(state.search.practicals) + '"></div></div>' +
+      '<div id="practicals-list"></div>';
+    renderPracticalsList();
+  }
+  function practicalRow(p){
+    const done = !!(p.data && p.data.done);
+    return '<div class="practical-row' + (done ? ' done' : '') + '" id="item-' + p.id + '">' +
+      '<label class="tick" aria-label="Mark practical done"><input type="checkbox" data-action="toggle-practical" data-id="' + p.id + '"' + (done ? ' checked' : '') + '><span class="tick-box">' + CHECK_SVG + '</span></label>' +
+      '<span class="name">' + esc(p.title) + '</span><span class="date">' + esc(fmtDate(p.date)) + '</span>' +
+      '<span class="row-actions">' + editBtn('edit-practical',p.id) + delBtn(p.id) + '</span></div>';
+  }
+  function renderPracticalsList(){
+    const q = state.search.practicals.trim().toLowerCase();
+    let subjects = state.entries.filter(e => e.section === 'subject');
+    if(q) subjects = subjects.filter(s => s.title.toLowerCase().includes(q));
+    const root = $('#practicals-list'); if(!root) return;
+    if(!subjects.length){
+      root.innerHTML = '<div class="empty"><div>' + (q ? 'No subjects match your search.' : 'Add a subject in Study first.') + '</div><button class="link-btn" data-action="tab" data-tab="study">Go to Study</button></div>';
+      return;
+    }
+    root.innerHTML = '<div class="grid">' + subjects.map(s => {
+      const st = subjectStats(s);
+      return '<div class="card prac-group tappable" data-action="open-prac-detail" data-id="' + s.id + '" id="item-sub-' + s.id + '">' +
+        '<div class="prac-head"><div class="prac-name">' + esc(s.title) + '</div><span class="chev">' + icon('chevron',16) + '</span></div>' +
+        '<div class="prac-count num">' + st.doneCount + ' / ' + st.total + ' practical done</div>' +
+        '<div style="margin-top:10px">' + bar(st.practicalPct,{height:5}) + '</div>' +
+        '</div>';
+    }).join('') + '</div>';
+  }
+
+  // Open a subject's practical list: tick, add by name, edit or remove here.
+  function openPracticalDetail(id){
+    const s = byId(id); if(!s) return;
+    pracDetailSubjectId = id;
+    const st = subjectStats(s);
+    openActionSheet(s.title,
+      '<div class="prac-detail-info"><span class="num">' + st.doneCount + ' / ' + st.total + ' practical done</span>' +
+        '<span class="stepper">' +
+          '<button class="step-btn" data-action="prac-total" data-id="' + s.id + '" data-delta="-1" aria-label="Decrease total">−</button>' +
+          '<span class="step-val num">' + st.total + '</span>' +
+          '<button class="step-btn" data-action="prac-total" data-id="' + s.id + '" data-delta="1" aria-label="Increase total">+</button>' +
+        '</span></div>' +
+      '<div class="inset">' + (st.practicals.length
+        ? st.practicals.sort((a,b) => (a.date || '').localeCompare(b.date || '')).map(practicalRow).join('')
+        : '<div class="inset-row static muted small">No practicals added yet.</div>') + '</div>' +
+      '<div class="fields" style="margin-top:16px">' +
+        '<label class="field"><span>New practical name</span><input class="input" id="prac-new-name" placeholder="e.g. Pendulum experiment"></label>' +
+        '<label class="field"><span>Date (optional)</span><input class="input" type="date" id="prac-new-date"></label>' +
+      '</div>' +
+      '<button class="btn primary block" style="margin-top:12px" data-action="add-practical-inline" data-id="' + s.id + '">Add practical</button>'
+    );
+  }
+  function reopenPracticalDetail(){
+    if(pracDetailSubjectId != null) openPracticalDetail(pracDetailSubjectId);
+  }
+  function addPracticalInline(id){
+    const name = ($('#prac-new-name') || {}).value;
+    if(!name || !name.trim()){ showError('Enter a practical name.'); return; }
+    supabase.from('entries').insert({section:'practical',title:name.trim(),
+      date:$('#prac-new-date').value || null,parent_id:id,data:{done:false},user_id:state.user.id}).select().single()
+      .then(({data,error}) => {
+        if(error) throw error;
+        if(data && data.id && !byId(data.id)) state.entries.push(data);
+        const subject = byId(id);
+        if(subject){
+          const doneCount = kids(id,'practical').filter(x => x.data && x.data.done).length;
+          subject.data = Object.assign({},subject.data,{practicalDone:doneCount});
+          persist(id,subject.data);
+        }
+        quickRender(); reopenPracticalDetail(); toast('Practical added');
+      })
+      .catch(err => { showError('Could not add: ' + (err.message || err)); refreshData(); });
+  }
+
   function renderChapter(ch){
-    const d = ch.data || {}, open = state.expanded.chapters.has(ch.id), pct = chapterStats(ch).pct;
+    const d = ch.data || {}, open = state.expanded.chapters.has(ch.id), st = chapterStats(ch);
     let h = '<div class="chapter-card" id="item-' + ch.id + '"><div class="chapter-head tappable" data-action="toggle-chapter" data-id="' + ch.id + '">' +
       '<span class="chev' + (open ? ' open' : '') + '">' + icon('chevron',15) + '</span>' +
       (d.number ? '<span class="number-pill">' + esc(d.number) + '</span>' : '') +
-      '<span class="chapter-name">' + esc(ch.title) + '</span><span class="subject-pct num">' + Math.round(pct) + '%</span></div>';
+      '<span class="chapter-name">' + esc(ch.title) + '</span>' +
+      (st.complete ? '<span class="completed-badge">Completed</span>' : '<span class="subject-pct num">' + Math.round(st.pct) + '%</span>') + '</div>';
     if(open){
       h += '<div class="chapter-body">' + ['cq','mcq','short'].map(t => {
-        const td = d[t] || {}, target = num(td.target), done = num(td.done);
-        const name = t === 'cq' ? 'CQ' : t === 'mcq' ? 'MCQ' : 'Short';
-        return '<div class="qtype"><div class="qtype-head"><span class="qtype-name">' + name + '</span>' +
-          '<span class="stepper"><button class="step-btn" data-action="bump" data-id="' + ch.id + '" data-type="' + t + '" data-field="done" data-delta="-1" aria-label="Decrease ' + name + ' done">−</button>' +
-          '<span class="step-val num">' + done + '</span><button class="step-btn" data-action="bump" data-id="' + ch.id + '" data-type="' + t + '" data-field="done" data-delta="1" aria-label="Increase ' + name + ' done">+</button></span>' +
-          '<span class="qtype-target num">/ ' + target + '</span>' +
-          '<span class="stepper target"><button class="step-btn" data-action="bump" data-id="' + ch.id + '" data-type="' + t + '" data-field="target" data-delta="-1" aria-label="Decrease ' + name + ' target">−</button>' +
-          '<button class="step-btn" data-action="bump" data-id="' + ch.id + '" data-type="' + t + '" data-field="target" data-delta="1" aria-label="Increase ' + name + ' target">+</button></span></div>' +
-          bar(target ? clamp(done / target * 100) : 0,{height:4}) + '</div>';
+        const name = t === 'cq' ? 'CQ' : t === 'mcq' ? 'MCQ' : 'Short questions';
+        return '<label class="qtype" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer">' +
+          '<span class="qtype-name">' + name + '</span>' +
+          '<span class="tick"><input type="checkbox" data-action="toggle-chapter-part" data-id="' + ch.id + '" data-type="' + t + '"' + (st.parts[t] ? ' checked' : '') + '><span class="tick-box">' + CHECK_SVG + '</span></span>' +
+          '</label>';
       }).join('') +
+      '<div style="margin-top:10px">' + bar(st.pct,{height:4}) + '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px"><span class="muted small">' +
       (ch.date ? 'Target ' + esc(fmtDate(ch.date)) : '') + (d.exam ? ' · Exam ' + esc(fmtDate(d.exam)) : '') + (!ch.date && !d.exam ? 'No dates set' : '') +
       '</span><span class="row-actions">' + editBtn('edit-chapter',ch.id) + delBtn(ch.id) + '</span></div></div>';
@@ -1138,36 +1325,40 @@
   function subjectForm(s){
     const d = (s && s.data) || {};
     openSheet(s ? 'Edit subject' : 'New subject', '<div class="fields">' +
-      fText('Name','name',s ? s.title : '') +
-      fNum('Total HSC practicals','practicalTotal',num(d.practicalTotal)) +
-      fNum('Practicals done','practicalDone',num(d.practicalDone)) + '</div>',
+      fText('Name','name',s ? s.title : '') + '</div>',
       fd => saveEntry({section:'subject',title:fd.get('name').trim(),date:null,parent_id:null,
-        data:{practicalTotal:num(fd.get('practicalTotal')),practicalDone:num(fd.get('practicalDone'))}},s ? s.id : null));
+        data:{practicalTotal:num(d.practicalTotal),practicalDone:num(d.practicalDone)}},s ? s.id : null));
   }
   function chapterForm(ch, subjectId){
     const d = (ch && ch.data) || {};
     openSheet(ch ? 'Edit chapter' : 'New chapter', '<div class="fields">' +
       fText('Name','name',ch ? ch.title : '') + fText('Number / code','number',d.number || '') +
       fDate('Target date','date',ch && ch.date ? ch.date : '') + fDate('Exam date','exam',d.exam || '') +
-      ['cq','mcq','short'].map(k => {
-        const label = k === 'cq' ? 'CQ' : k === 'mcq' ? 'MCQ' : 'Short';
-        return '<div class="field"><span>' + label + ' (done / target)</span><div style="display:flex;gap:8px">' +
-          '<input class="input" type="number" min="0" name="done_' + k + '" placeholder="Done" value="' + num((d[k]||{}).done) + '">' +
-          '<input class="input" type="number" min="0" name="target_' + k + '" placeholder="Target" value="' + num((d[k]||{}).target) + '"></div></div>';
-      }).join('') + '</div>',
+      '<div class="field"><span>Question types — tick as you finish</span><div class="inset">' +
+        ['cq','mcq','short'].map(k => {
+          const label = k === 'cq' ? 'CQ' : k === 'mcq' ? 'MCQ' : 'Short questions';
+          return '<label class="inset-row tappable"><input type="checkbox" name="' + k + '"' + (d[k] ? ' checked' : '') + ' style="width:18px;height:18px;accent-color:var(--accent)"><span class="row-main">' + label + '</span></label>';
+        }).join('') + '</div></div></div>',
       fd => saveEntry({section:'chapter',title:fd.get('name').trim(),date:fd.get('date') || null,parent_id:subjectId,
         data:{number:fd.get('number').trim(),exam:fd.get('exam') || null,
-          cq:{target:num(fd.get('target_cq')),done:num(fd.get('done_cq'))},
-          mcq:{target:num(fd.get('target_mcq')),done:num(fd.get('done_mcq'))},
-          short:{target:num(fd.get('target_short')),done:num(fd.get('done_short'))}}},ch ? ch.id : null));
+          cq:fd.has('cq'),mcq:fd.has('mcq'),short:fd.has('short')}},ch ? ch.id : null));
   }
   function practicalForm(p, subjectId){
     const d = (p && p.data) || {};
-    openSheet(p ? 'Edit practical' : 'New practical', '<div class="fields">' +
+    const subjects = state.entries.filter(e => e.section === 'subject');
+    const subjectField = (subjectId != null) ? '' :
+      '<label class="field"><span>Subject</span><select class="input" name="subject">' +
+        subjects.map(s => '<option value="' + s.id + '"' + ((p && p.parent_id === s.id) ? ' selected' : '') + '>' + esc(s.title) + '</option>').join('') +
+      '</select></label>';
+    openSheet(p ? 'Edit practical' : 'New practical', '<div class="fields">' + subjectField +
       fText('Name','name',p ? p.title : '') + fDate('Date','date',p && p.date ? p.date : '') +
       '<div class="field"><span>Status</span><label style="display:flex;align-items:center;gap:10px;color:var(--text);cursor:pointer"><input type="checkbox" name="done"' + (d.done ? ' checked' : '') + '> Done</label></div></div>',
-      fd => saveEntry({section:'practical',title:fd.get('name').trim(),date:fd.get('date') || null,parent_id:subjectId,
-        data:{done:fd.has('done')}},p ? p.id : null));
+      fd => {
+        const parent = (subjectId != null) ? subjectId : num(fd.get('subject'));
+        if(!parent){ showError('Add a subject first.'); return; }
+        return saveEntry({section:'practical',title:fd.get('name').trim(),date:fd.get('date') || null,parent_id:parent,
+          data:{done:fd.has('done')}},p ? p.id : null);
+      });
   }
 
   /* ==========================================================================
@@ -1195,7 +1386,7 @@
           '<div><div class="stage-pill">' + esc(cap(stage)) + '</div><div class="row-sub">' + (d.startDate ? 'Started ' + esc(fmtDate(d.startDate)) : '') + (p.date ? ' · Deadline ' + esc(fmtDate(p.date)) : '') + '</div>' +
           '<div class="countdown ' + cd.tone + '">' + esc(cd.text) + '</div></div></div>' +
         (d.notes ? '<p class="item-notes">' + esc(d.notes) + '</p>' : '') +
-        (d.link ? '<div class="item-link">' + icon('link',15) + ' <a href="' + esc(d.link) + '" target="_blank" rel="noopener noreferrer">' + esc(d.link) + '</a></div>' : '') +
+        (safeUrl(d.link) ? '<div class="item-link">' + icon('link',15) + ' <a href="' + safeUrl(d.link) + '" target="_blank" rel="noopener noreferrer">' + esc(d.link) + '</a></div>' : '') +
         '</div>';
     }).join('') + '</div>';
   }
@@ -1276,7 +1467,7 @@
   }
   function renderAchievements(){
     $('#section-root').innerHTML =
-      '<div class="section-head"><div><h1 class="large-title">Achievements</h1><p class="section-sub">Your wins, awards and recognition</p></div>' +
+      '<div class="section-head"><div><h1 class="large-title">Achievements</h1><p class="section-sub">Your prize gallery — every win, award and recognition</p></div>' +
       '<div class="head-actions"><input class="search" data-search="achievements" placeholder="Search achievements…" value="' + esc(state.search.achievements) + '"><button class="btn primary" data-action="add-achievement">' + icon('plus',17) + ' Achievement</button></div></div>' +
       filterSegmented() + '<div id="achievements-list"></div>';
     renderAchievementsList();
@@ -1292,12 +1483,16 @@
     if(!items.length){ root.innerHTML = emptyState(q || state.achFilter.category || state.achFilter.year ? 'No achievements match these filters.' : 'No achievements yet. Record your first win.','add-achievement','+ Add achievement'); return; }
     root.innerHTML = '<div class="achievement-list">' + items.map(a => {
       const d = a.data || {}, tags = d.tags || [];
-      return '<div class="card item-card" id="item-' + a.id + '">' +
-        '<div class="item-top"><h3 class="item-title">' + esc(a.title) + '</h3><span class="row-actions">' + editBtn('edit-achievement',a.id) + delBtn(a.id) + '</span></div>' +
-        '<div class="item-meta"><span class="row-sub">' + esc(cap(d.category || 'achievement')) + '</span><span class="row-sub">' + esc(fmtDate(a.date)) + '</span>' + (d.organization ? '<span class="row-sub">' + esc(d.organization) + '</span>' : '') + '</div>' +
-        (d.description ? '<p class="item-notes">' + esc(d.description) + '</p>' : '') +
+      const year = a.date ? new Date(a.date).getFullYear() : '';
+      return '<div class="prize-card" id="item-' + a.id + '">' +
+        '<span class="row-actions">' + editBtn('edit-achievement',a.id) + delBtn(a.id) + '</span>' +
+        '<div class="prize-medal">' + icon('award',28) + '</div>' +
+        '<div class="prize-year">' + esc(cap(d.category || 'achievement')) + (year ? ' · ' + year : '') + '</div>' +
+        '<div class="prize-title">' + esc(a.title) + '</div>' +
+        (d.organization ? '<div class="prize-org">' + esc(d.organization) + '</div>' : '') +
+        (d.description ? '<p class="prize-desc">' + esc(d.description) + '</p>' : '') +
         (tags.length ? '<div class="tags">' + tags.map(t => '<span class="tag">#' + esc(t) + '</span>').join('') + '</div>' : '') +
-        (d.proofLink ? '<div class="item-link">' + icon('link',15) + ' <a href="' + esc(d.proofLink) + '" target="_blank" rel="noopener noreferrer">Proof / link</a></div>' : '') +
+        (safeUrl(d.proofLink) ? '<div class="item-link">' + icon('link',15) + ' <a href="' + safeUrl(d.proofLink) + '" target="_blank" rel="noopener noreferrer">Proof / link</a></div>' : '') +
         '</div>';
     }).join('') + '</div>';
   }
@@ -1373,10 +1568,11 @@
   function openMoreSheet(){
     openActionSheet('More',
       '<div class="group-label">Navigate</div><div class="inset">' +
+        '<button class="inset-row tappable" data-action="tab" data-tab="practicals">' + icon('list',19) + '<span class="row-main">Practicals</span></button>' +
         '<button class="inset-row tappable" data-action="tab" data-tab="achievements">' + icon('award',19) + '<span class="row-main">Achievements</span></button>' +
         '<button class="inset-row tappable" data-action="tab" data-tab="settings">' + icon('settings',19) + '<span class="row-main">Settings</span></button>' +
       '</div><div class="group-label">Account</div><div class="inset">' +
-        '<button class="inset-row tappable" data-action="logout" style="color:var(--red)">' + icon('logout',19) + '<span class="row-main">Logout</span></button>' +
+        '<button class="inset-row tappable" data-action="logout" style="color:var(--red-text)">' + icon('logout',19) + '<span class="row-main">Logout</span></button>' +
       '</div>');
   }
   document.addEventListener('click', e => {
@@ -1399,7 +1595,8 @@
 
       case 'add-subject': subjectForm(null); break;
       case 'add-chapter': chapterForm(null,id); break;
-      case 'add-practical': practicalForm(null,id); break;
+      case 'open-prac-detail': openPracticalDetail(id); break;
+      case 'add-practical-inline': addPracticalInline(id); break;
       case 'add-project': projectForm(null); break;
       case 'add-competition': competitionForm(null); break;
       case 'add-achievement': achievementForm(null); break;
@@ -1418,7 +1615,7 @@
       case 'toggle-chapter':
         state.expanded.chapters.has(id) ? state.expanded.chapters.delete(id) : state.expanded.chapters.add(id);
         renderStudyList(); break;
-      case 'bump': bump(id,el.dataset.type,el.dataset.field,num(el.dataset.delta)); break;
+      case 'prac-total': adjustPracticalTotal(id,num(el.dataset.delta)); break;
 
       case 'export': exportData(); break;
       case 'import': $('#import-file').click(); break;
@@ -1433,12 +1630,13 @@
   document.addEventListener('input', e => {
     const key = e.target.dataset.search; if(!key) return;
     state.search[key] = e.target.value;
-    ({study:renderStudyList,projects:renderProjectsList,competitions:renderCompetitionsList,achievements:renderAchievementsList})[key]();
+    ({study:renderStudyList,practicals:renderPracticalsList,projects:renderProjectsList,competitions:renderCompetitionsList,achievements:renderAchievementsList})[key]();
   });
-  document.addEventListener('change', async e => {
+  document.addEventListener('change', e => {
     const a = e.target.dataset.action;
-    if(a === 'toggle-practical'){ await togglePractical(num(e.target.dataset.id),e.target.checked); return; }
-    if(a === 'toggle-task'){ await toggleTask(num(e.target.dataset.id),num(e.target.dataset.index),e.target.checked); return; }
+    if(a === 'toggle-practical'){ togglePractical(num(e.target.dataset.id),e.target.checked); return; }
+    if(a === 'toggle-chapter-part'){ toggleChapterPart(num(e.target.dataset.id),e.target.dataset.type,e.target.checked); return; }
+    if(a === 'toggle-task'){ toggleTask(num(e.target.dataset.id),num(e.target.dataset.index),e.target.checked); return; }
     if(e.target.id === 'import-file'){
       const file = e.target.files && e.target.files[0]; if(!file) return;
       const reader = new FileReader();
@@ -1452,34 +1650,41 @@
   document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSheet(); });
 
   /* ---------- Quick mutations ---------- */
-  async function bump(id, type, field, delta){
+  // Tick/untick one of a chapter's three question types.
+  function toggleChapterPart(id, type, checked){
+    const e = byId(id); if(!e || !['cq','mcq','short'].includes(type)) return;
+    e.data = Object.assign({},e.data,{[type]:checked});
+    quickRender();
+    persist(id,e.data);
+  }
+  function adjustPracticalTotal(id, delta){
     const e = byId(id); if(!e) return;
-    const d = JSON.parse(JSON.stringify(e.data || {}));
-    d[type] = d[type] || {target:0,done:0};
-    d[type][field] = Math.max(0,num(d[type][field]) + delta);
-    try{ await patchData(id,d); await refreshData({silent:true}); }
-    catch(err){ showError('Could not update: ' + (err.message || err)); }
+    e.data = Object.assign({},e.data,{practicalTotal:Math.max(0,num(e.data && e.data.practicalTotal) + delta)});
+    quickRender(); reopenPracticalDetail();
+    persist(id,e.data);
   }
-  async function togglePractical(id, checked){
-    try{
-      await patchData(id,Object.assign({},(byId(id)||{}).data,{done:checked}));
-      const p = byId(id);
-      if(p && p.parent_id){
-        const sibs = kids(p.parent_id,'practical');
-        const doneCount = sibs.filter(x => x.id === id ? checked : !!(x.data && x.data.done)).length;
-        const subj = byId(p.parent_id);
-        if(subj) await patchData(subj.id,Object.assign({},subj.data,{practicalDone:doneCount}));
+  function togglePractical(id, checked){
+    const p = byId(id); if(!p) return;
+    p.data = Object.assign({},p.data,{done:checked});
+    if(p.parent_id){
+      const subj = byId(p.parent_id);
+      if(subj){
+        const doneCount = kids(p.parent_id,'practical').filter(x => x.id === id ? checked : !!(x.data && x.data.done)).length;
+        subj.data = Object.assign({},subj.data,{practicalDone:doneCount});
+        persist(subj.id,subj.data);
       }
-      await refreshData({silent:true});
-    }catch(err){ showError('Could not update: ' + (err.message || err)); }
+    }
+    quickRender(); reopenPracticalDetail();
+    persist(id,p.data);
   }
-  async function toggleTask(id, index, checked){
+  function toggleTask(id, index, checked){
     const e = byId(id); if(!e) return;
     const d = JSON.parse(JSON.stringify(e.data || {}));
     d.tasks = d.tasks || [];
     if(d.tasks[index]) d.tasks[index].done = checked;
-    try{ await patchData(id,d); await refreshData({silent:true}); }
-    catch(err){ showError('Could not update: ' + (err.message || err)); }
+    e.data = d;
+    quickRender();
+    persist(id,d);
   }
 
   /* ---------- Boot ---------- */
