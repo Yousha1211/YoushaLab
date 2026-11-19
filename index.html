@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#060D18">
+  <title>YoushaLab</title>
+
+  <!-- Inter: light + bold only, matching the brand wordmark -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — iOS-style dark navy productivity palette
+       ============================================================ */
+    :root{
+      --bg:#060D18;                 /* page background */
+      --surface:#0E1A2C;            /* grouped surfaces: cards + inset lists */
+      --surface-hover:#132238;      /* row hover */
+      --elevated:#17283F;           /* sheets, popovers, inputs */
+      --separator:rgba(255,255,255,0.08);
+
+      --text:#F2F5FA;               /* primary */
+      --secondary:rgba(235,240,250,0.6);
+      --tertiary:rgba(235,240,250,0.35);
+
+      --accent:#0A84FF;             /* active item, primary buttons, links, charts */
+      --green:#30D158;              /* on track / done */
+      --yellow:#FFD60A;             /* due within 7 days */
+      --red:#FF453A;                /* overdue */
+      --green-soft:rgba(48,209,88,0.12);
+      --yellow-soft:rgba(255,214,10,0.12);
+      --red-soft:rgba(255,69,58,0.12);
+
+      --header-bg:#FFFFFF;
+      --header-border:#E2E8F0;
+      --navy-text:#0B1A33;
+
+      --radius-card:12px;
+      --radius-input:8px;
+      --header-h:56px;
+      --sidebar-w:240px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;
+      font-size:17px;
+      line-height:1.45;
+      color:var(--text);
+      background:var(--bg);
+      min-height:100vh;
+      font-variant-numeric:tabular-nums;
+      color-scheme:dark;
+      -webkit-font-smoothing:antialiased;
+    }
+    button,input,select,textarea{font:inherit;color:inherit}
+    button{cursor:pointer}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    [hidden]{display:none !important}
+    .num{font-variant-numeric:tabular-nums}
+    .muted{color:var(--secondary)}
+    .tertiary{color:var(--tertiary)}
+    .small{font-size:13px}
+    .group-label{
+      font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+      color:var(--tertiary);padding:18px 22px 6px;
+    }
+
+    /* ---------- Header: logo + wordmark only, no buttons ---------- */
+    .app-header{
+      height:var(--header-h);background:var(--header-bg);
+      border-bottom:1px solid var(--header-border);
+      display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:40;
+    }
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand img{height:32px;width:auto;display:block}
+    .brand-name{display:flex;gap:0;white-space:nowrap}
+    .brand-thin{font-weight:300}
+    .brand-bold{font-weight:700}
+    .brand-thin,.brand-bold{color:var(--navy-text);font-size:22px;letter-spacing:-.02em;line-height:1}
+
+    /* ---------- App shell: sidebar + main ---------- */
+    .app-shell{display:flex;min-height:calc(100vh - var(--header-h))}
+    .sidebar{
+      width:var(--sidebar-w);flex:0 0 var(--sidebar-w);
+      background:rgba(10,22,40,0.85);
+      -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+      border-right:1px solid var(--separator);
+      position:sticky;top:var(--header-h);height:calc(100vh - var(--header-h));
+      display:flex;flex-direction:column;z-index:20;
+    }
+    .sidebar nav{flex:1;overflow-y:auto;padding-top:4px}
+    .nav-row{
+      display:flex;align-items:center;gap:11px;width:calc(100% - 20px);
+      margin:2px 10px;padding:9px 12px;min-height:40px;
+      background:transparent;border:0;border-radius:8px;color:var(--secondary);
+      text-align:left;font-size:15px;
+      transition:background .2s ease,opacity .2s ease,color .2s ease;
+    }
+    .nav-row:hover{background:var(--surface-hover)}
+    .nav-row.active{background:rgba(10,132,255,0.16);color:var(--accent)}
+    .nav-row svg{flex:0 0 auto;opacity:.9}
+    .sidebar-footer{border-top:1px solid var(--separator);padding:10px 0 calc(10px + env(safe-area-inset-bottom))}
+
+    .main{flex:1;min-width:0;padding:28px clamp(16px,4vw,40px) 64px}
+    .main-inner{max-width:1180px;margin:0 auto}
+
+    .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+    .large-title{font-size:34px;font-weight:700;letter-spacing:-.025em;margin:0;color:var(--text)}
+    .section-sub{margin:6px 0 0;font-size:13px;color:var(--secondary)}
+    .head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+    /* ---------- Dashboard grid ---------- */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;align-items:start}
+    .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+
+    /* ---------- Surfaces ---------- */
+    .card,.panel,.inset{
+      background:var(--surface);border:1px solid var(--separator);border-radius:var(--radius-card);
+    }
+    .panel{padding:18px}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .panel-head h2{font-size:17px;font-weight:600;margin:0;display:flex;align-items:center;gap:9px}
+    .panel-head .panel-icon{color:var(--accent);display:inline-flex}
+    .inkset{background:transparent}
+
+    .inset{overflow:hidden}
+    .inset-row{
+      display:flex;align-items:center;gap:12px;width:100%;
+      padding:13px 15px;background:transparent;border:0;border-bottom:1px solid var(--separator);
+      text-align:left;color:var(--text);font-size:15px;
+      transition:background .2s ease,opacity .2s ease;
+    }
+    .inset-row:last-child{border-bottom:0}
+    .inset-row:hover{background:var(--surface-hover)}
+    .inset-row.static{cursor:default}
+    .inset-row.static:hover{background:transparent}
+    .row-main{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .row-sub{font-size:13px;color:var(--secondary)}
+    .row-between{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%}
+    .row-right{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+
+    /* ---------- Buttons & links ---------- */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:7px;
+      min-height:38px;padding:8px 14px;border-radius:var(--radius-input);
+      border:1px solid transparent;font-size:14px;font-weight:600;
+      transition:background .2s ease,opacity .2s ease,transform .1s ease;
+    }
+    .btn:active,.tappable:active,.nav-row:active,.tab:active,.inset-row:active,.step-btn:active{opacity:.6}
+    .btn.primary{background:var(--accent);color:#fff}
+    .btn.primary:hover{background:#339BFF}
+    .btn.ghost{background:rgba(255,255,255,0.06);border-color:var(--separator);color:var(--text)}
+    .btn.ghost:hover{background:var(--surface-hover)}
+    .btn.danger{background:var(--red-soft);color:var(--red);border-color:rgba(255,69,58,0.25)}
+    .btn.small{min-height:30px;padding:5px 10px;font-size:13px}
+    .btn.block{width:100%}
+    .link-btn{
+      background:none;border:0;color:var(--accent);font-size:14px;font-weight:600;
+      padding:6px 2px;transition:opacity .2s ease;
+    }
+    .link-btn:hover{text-decoration:underline}
+    .tappable{transition:opacity .2s ease,background .2s ease}
+    .highlight{outline:1px solid rgba(10,132,255,.55);background:rgba(10,132,255,.10) !important;border-radius:8px}
+    .icon-btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:30px;height:30px;border-radius:8px;border:1px solid transparent;
+      background:transparent;color:var(--secondary);transition:background .2s ease,opacity .2s ease;
+    }
+    .icon-btn:hover{background:var(--surface-hover);color:var(--text)}
+    .row-actions{display:inline-flex;gap:2px;flex:0 0 auto}
+
+    /* ---------- Inputs / forms ---------- */
+    .search{
+      background:var(--elevated);border:1px solid var(--separator);border-radius:var(--radius-input);
+      padding:9px 12px;min-height:38px;font-size:14px;color:var(--text);min-width:180px;
+    }
+    .search::placeholder,.input::placeholder,textarea::placeholder{color:var(--tertiary)}
+    .fields{display:grid;gap:14px;padding-top:4px}
+    .field{display:grid;gap:6px}
+    .field>span{font-size:13px;color:var(--secondary)}
+    .input,textarea,select.input{
+      width:100%;background:var(--elevated);border:1px solid var(--separator);
+      border-radius:var(--radius-input);padding:10px 12px;font-size:16px;color:var(--text);
+    }
+    textarea{min-height:86px;resize:vertical}
+    .form-error{color:var(--red);font-size:13px;min-height:18px;margin-top:2px}
+    .form-notice{color:var(--green);font-size:13px;margin:4px 0}
+
+    /* iOS segmented control */
+    .segmented{
+      display:flex;gap:2px;background:var(--surface);border:1px solid var(--separator);
+      border-radius:9px;padding:3px;overflow-x:auto;
+    }
+    .seg{flex:1 0 auto;position:relative}
+    .seg input{position:absolute;opacity:0;width:0;height:0}
+    .seg span{
+      display:block;text-align:center;padding:7px 12px;border-radius:7px;
+      font-size:13px;color:var(--secondary);white-space:nowrap;transition:background .2s ease,color .2s ease;
+    }
+    .seg input:checked+span{background:var(--elevated);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+    .seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+    .segmented.filter{margin-bottom:16px}
+
+    /* ---------- Charts & bars ---------- */
+    .donut{display:block;flex:0 0 auto}
+    .bar{width:100%;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .35s ease}
+    .dot,.section-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:var(--accent)}
+    .section-dot.chapter{background:var(--accent)}
+    .section-dot.practical{background:var(--green)}
+    .section-dot.project{background:#5E9BE8}
+    .section-dot.competition{background:var(--yellow)}
+    .section-dot.exam{background:var(--red)}
+    .countdown{font-size:13px;font-weight:600;white-space:nowrap}
+    .countdown.ok{color:var(--green)}
+    .countdown.warn{color:var(--yellow)}
+    .countdown.bad{color:var(--red)}
+
+    /* Stat tiles */
+    .tile{
+      display:flex;align-items:center;gap:12px;background:var(--surface);
+      border:1px solid var(--separator);border-radius:var(--radius-card);padding:13px 14px;
+    }
+    .tile-body{min-width:0}
+    .tile-label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tertiary)}
+    .tile-value{font-size:20px;font-weight:700;line-height:1.25;color:var(--text)}
+    .tile-sub{font-size:12px;color:var(--secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+    /* Dashboard inset rows */
+    .study-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .study-name{font-weight:600;font-size:16px}
+    .qbars{margin-top:10px;display:grid;gap:8px}
+    .qline-head{display:flex;justify-content:space-between;font-size:13px;color:var(--secondary);margin-bottom:5px}
+    .qtype-name{font-size:13px;color:var(--secondary);min-width:42px}
+    .stage-pill{font-size:13px;color:var(--secondary)}
+
+    .empty{display:grid;gap:8px;justify-items:start;padding:6px 2px 2px;font-size:13px}
+    .day-head{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tertiary);margin:16px 0 8px}
+    .category-counts{font-size:13px;color:var(--secondary);line-height:1.7;margin-top:12px}
+
+    /* Skeleton loading */
+    .skeleton{
+      background:linear-gradient(90deg,rgba(255,255,255,0.04),rgba(255,255,255,0.09),rgba(255,255,255,0.04));
+      background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:6px;
+    }
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .sk-line{height:13px;margin:10px 0}
+    .sk-stat,.sk-panel{height:96px}
+
+    /* ---------- Study ---------- */
+    .card.subject-card{padding:0;overflow:hidden}
+    .subject-head{
+      display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;
+      transition:background .2s ease,opacity .2s ease;
+    }
+    .subject-head:hover{background:var(--surface-hover)}
+    .subject-name{font-weight:600;flex:1;font-size:16px}
+    .subject-pct{color:var(--accent);font-weight:700}
+    .chev{display:inline-flex;color:var(--tertiary);transition:transform .2s ease}
+    .chev.open{transform:rotate(90deg)}
+    .card-body{padding:0 16px 16px;border-top:1px solid var(--separator)}
+    .subblock{margin-top:16px}
+    .subblock-title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--secondary);margin-bottom:8px}
+    .chapter-card{border:1px solid var(--separator);border-radius:10px;background:rgba(255,255,255,0.02);margin-top:10px;overflow:hidden}
+    .chapter-head{display:flex;align-items:center;gap:8px;padding:11px 12px;cursor:pointer;transition:background .2s ease,opacity .2s ease}
+    .chapter-head:hover{background:var(--surface-hover)}
+    .chapter-name{flex:1;font-size:15px}
+    .number-pill{font-size:12px;color:var(--accent);background:rgba(10,132,255,0.16);padding:2px 8px;border-radius:6px;margin-right:4px}
+    .chapter-body{padding:4px 12px 12px;border-top:1px solid var(--separator)}
+    .qtype{padding:10px 0;border-bottom:1px solid var(--separator)}
+    .qtype:last-of-type{border-bottom:0}
+    .qtype-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+    .qtype-target{font-size:13px;color:var(--secondary);margin-left:-4px}
+    .stepper{display:inline-flex;align-items:center;gap:2px;background:var(--elevated);border:1px solid var(--separator);border-radius:8px;overflow:hidden}
+    .step-btn{width:30px;height:28px;border:0;background:transparent;color:var(--accent);font-size:18px;line-height:1;transition:background .2s ease,opacity .2s ease}
+    .step-btn:hover{background:var(--surface-hover)}
+    .step-val{min-width:26px;text-align:center;font-size:14px;font-weight:600}
+    .stepper.target{margin-left:auto}
+    .stepper.target .step-btn{color:var(--secondary);width:26px}
+    .practical-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--separator)}
+    .practical-row:last-child{border-bottom:0}
+    .practical-row .name{flex:1;font-size:15px}
+    .practical-row.done .name{text-decoration:line-through;color:var(--tertiary)}
+    .practical-row .date{font-size:13px;color:var(--secondary)}
+
+    /* iOS switch */
+    .switch{position:relative;display:inline-flex;flex:0 0 auto;cursor:pointer}
+    .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+    .switch-track{width:44px;height:26px;border-radius:99px;background:rgba(255,255,255,0.16);transition:background .2s ease;position:relative}
+    .switch-thumb{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .2s ease}
+    .switch input:checked+.switch-track{background:var(--green)}
+    .switch input:checked+.switch-track .switch-thumb{transform:translateX(18px)}
+    .switch input:focus-visible+.switch-track{outline:2px solid var(--accent);outline-offset:2px}
+
+    /* ---------- Cards for projects / competitions / achievements ---------- */
+    .item-card{padding:16px}
+    .item-card .item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .item-title{font-size:17px;font-weight:600;margin:0;min-width:0;overflow-wrap:anywhere}
+    .item-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .item-notes{font-size:14px;color:var(--secondary);margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+    .item-link{font-size:13px;margin-top:10px}
+    .item-link a{color:var(--accent);text-decoration:none;overflow-wrap:anywhere}
+    .item-link a:hover{text-decoration:underline}
+    .divider-label{
+      font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tertiary);
+      margin:22px 0 10px;padding-top:14px;border-top:1px solid var(--separator);
+    }
+    .task{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:15px;cursor:pointer}
+    .task.done span{text-decoration:line-through;color:var(--tertiary)}
+    .task input{width:18px;height:18px;accent-color:var(--accent);flex:0 0 auto}
+    .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+    .tag{font-size:12px;color:var(--secondary);background:rgba(255,255,255,0.05);border:1px solid var(--separator);padding:2px 8px;border-radius:6px}
+    .achievement-list{display:grid;gap:14px}
+
+    /* ---------- Bottom tab bar (phones) ---------- */
+    .tabbar{display:none}
+
+    /* ---------- Auth screens ---------- */
+    .auth-screen{min-height:calc(100vh - var(--header-h));display:flex;align-items:center;justify-content:center;padding:24px}
+    .auth-card{
+      width:100%;max-width:380px;background:var(--surface);border:1px solid var(--separator);
+      border-radius:var(--radius-card);padding:28px 24px;
+    }
+    .auth-icon{display:inline-flex;color:var(--accent);margin-bottom:12px}
+    .auth-card h1{font-size:24px;margin:0;font-weight:700}
+    .auth-card>p{margin:6px 0 22px;font-size:14px}
+    .auth-card .btn{margin-top:14px}
+    .auth-card .link-btn{display:block;margin:14px auto 0}
+    .boot-screen{min-height:calc(100vh - var(--header-h));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+    .spinner{width:26px;height:26px;border:2px solid var(--separator);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ---------- Sheet / modal ---------- */
+    .sheet-backdrop{
+      position:fixed;inset:0;background:rgba(2,6,12,0.6);z-index:60;
+      display:flex;align-items:center;justify-content:center;padding:20px;
+      -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+    }
+    .sheet{
+      width:100%;max-width:520px;max-height:calc(100vh - 40px);overflow-y:auto;
+      background:var(--elevated);border:1px solid var(--separator);border-radius:var(--radius-card);
+      box-shadow:0 18px 50px rgba(0,0,0,.45);
+    }
+    .sheet-head{
+      display:grid;grid-template-columns:70px 1fr 70px;align-items:center;
+      padding:14px 16px;border-bottom:1px solid var(--separator);position:sticky;top:0;background:var(--elevated);z-index:1;
+    }
+    .sheet-head h2{font-size:16px;font-weight:600;margin:0;text-align:center}
+    .sheet-side{background:none;border:0;color:var(--secondary);font-size:15px;padding:6px 0;transition:opacity .2s ease}
+    .sheet-side.save{color:var(--accent);font-weight:600;text-align:right}
+    .sheet-side:active{opacity:.6}
+    .sheet form{padding:18px 16px 24px}
+    .sheet .action-body{padding:8px 16px 20px}
+    .sheet .action-body .inset{background:var(--surface)}
+
+    /* ---------- Error banner + toast ---------- */
+    .error-banner{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:var(--red-soft);border-bottom:1px solid rgba(255,69,58,0.3);
+      color:var(--red);padding:10px 16px;font-size:14px;z-index:35;
+    }
+    .error-banner button{background:none;border:0;color:var(--red);display:inline-flex;padding:4px}
+    #toast-root{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;z-index:80;pointer-events:none}
+    .toast{
+      background:var(--elevated);border:1px solid var(--separator);color:var(--text);
+      padding:11px 16px;border-radius:10px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+      animation:toast-in .2s ease;
+    }
+    .toast.error{color:var(--red)}
+    @keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+    /* ---------- Responsive: phones ---------- */
+    @media (max-width:760px){
+      :root{--header-h:52px}
+      .sidebar{display:none}
+      .main{padding:20px 16px calc(96px + env(safe-area-inset-bottom))}
+      .grid{grid-template-columns:1fr;gap:16px}
+      .stat-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .section-head{align-items:flex-start}
+      .head-actions{width:100%}
+      .head-actions .search{flex:1;min-width:0}
+
+      .tabbar{
+        display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;
+        background:rgba(14,26,44,0.92);
+        -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+        border-top:1px solid var(--separator);
+        padding-bottom:env(safe-area-inset-bottom);
+      }
+      .tab{
+        flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+        min-height:58px;background:none;border:0;color:var(--secondary);font-size:10px;
+        transition:opacity .2s ease,color .2s ease;
+      }
+      .tab.active{color:var(--accent)}
+      .tab span{font-size:10px}
+
+      .sheet-backdrop{align-items:flex-end;padding:0}
+      .sheet{max-width:none;max-height:88vh;border-radius:14px 14px 0 0;border-bottom:0;animation:sheet-up .24s ease}
+      @keyframes sheet-up{from{transform:translateY(20px);opacity:.6}to{transform:none;opacity:1}}
+    }
+    @media (prefers-reduced-motion:reduce){
+      *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- White header: logo + wordmark only -->
+  <header class="app-header">
+    <div class="brand">
+      <img src="logo.png" alt="YoushaLab logo" onerror="this.style.display='none'">
+      <div class="brand-name"><span class="brand-thin">Yousha</span><span class="brand-bold">Lab</span></div>
+    </div>
+  </header>
+
+  <div id="error-banner" class="error-banner" hidden>
+    <span id="error-text"></span>
+    <button data-action="dismiss-error" aria-label="Dismiss error">✕</button>
+  </div>
+
+  <!-- Boot: session restore -->
+  <div id="boot-screen" class="boot-screen">
+    <div class="spinner"></div>
+    <div class="muted small">Restoring session…</div>
+  </div>
+
+  <!-- Login: password only -->
+  <div id="login-screen" class="auth-screen" hidden>
+    <div class="auth-card">
+      <div class="auth-icon" id="login-icon"></div>
+      <h1>YoushaLab</h1>
+      <p class="muted">Enter your password to continue.</p>
+      <form id="login-form">
+        <label class="field">
+          <span>Password</span>
+          <input class="input" id="login-password" type="password" autocomplete="current-password" placeholder="Password" required>
+        </label>
+        <div id="login-error" class="form-error" role="alert"></div>
+        <div id="login-notice" class="form-notice" hidden></div>
+        <button class="btn primary block" type="submit">Sign in</button>
+      </form>
+      <button class="link-btn" data-action="forgot">Forgot password?</button>
+    </div>
+  </div>
+
+  <!-- Password recovery (opened from emailed link) -->
+  <div id="recovery-screen" class="auth-screen" hidden>
+    <div class="auth-card">
+      <div class="auth-icon" id="recovery-icon"></div>
+      <h1>Set a new password</h1>
+      <div id="recovery-valid">
+        <p class="muted">Choose a new password for your account.</p>
+        <form id="recovery-form">
+          <div class="fields">
+            <label class="field"><span>New password</span><input class="input" id="new-password" type="password" autocomplete="new-password" placeholder="At least 6 characters" required></label>
+            <label class="field"><span>Confirm password</span><input class="input" id="confirm-password" type="password" autocomplete="new-password" placeholder="Repeat password" required></label>
+          </div>
+          <div id="recovery-error" class="form-error" role="alert"></div>
+          <button class="btn primary block" type="submit">Update password</button>
+        </form>
+        <button class="link-btn" data-action="back-login">Back to sign in</button>
+      </div>
+      <div id="recovery-expired" hidden>
+        <p class="muted">This link has expired. Request a new one</p>
+        <button class="btn primary block" data-action="request-reset">Request a new one</button>
+        <button class="link-btn" data-action="back-login">Back to sign in</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- The tracker -->
+  <div id="app" class="app-shell" hidden>
+    <aside class="sidebar">
+      <nav>
+        <div class="group-label">Overview</div>
+        <button class="nav-row" data-action="tab" data-tab="dashboard"></button>
+
+        <div class="group-label">Work</div>
+        <button class="nav-row" data-action="tab" data-tab="study"></button>
+        <button class="nav-row" data-action="tab" data-tab="projects"></button>
+        <button class="nav-row" data-action="tab" data-tab="competitions"></button>
+        <button class="nav-row" data-action="tab" data-tab="achievements"></button>
+
+        <div class="group-label">Data</div>
+        <button class="nav-row" data-action="tab" data-tab="settings"></button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-row" data-action="logout"></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="main-inner" id="section-root"></div>
+    </main>
+
+    <nav class="tabbar">
+      <button class="tab" data-action="tab" data-tab="dashboard"></button>
+      <button class="tab" data-action="tab" data-tab="study"></button>
+      <button class="tab" data-action="tab" data-tab="projects"></button>
+      <button class="tab" data-action="tab" data-tab="competitions"></button>
+      <button class="tab" data-action="more"></button>
+    </nav>
+  </div>
+
+  <div id="sheet-root"></div>
+  <div id="toast-root"></div>
+  <input type="file" id="import-file" accept="application/json,.json" hidden>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script>
+  /* ==========================================================================
+     CONFIG — the only values you need to change
+     ========================================================================== */
+  const CONFIG = {
+    SUPABASE_URL: 'https://slbtxkiwxuxflybnniml.supabase.co',
+    SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_-IJhM5brMqIpNEDURH7srA__KhWtlkH',
+    LOGIN_EMAIL: 'mdrakibulkaisar@gmail.com'   // hidden account; only a password is typed
+  };
+  /* No secret key of any kind is used or stored anywhere in this file. */
+  /* ========================================================================== */
+
+  // Capture a recovery link before Supabase exchanges (and strips) the URL hash.
+  const RECOVERY_LINK = /type=recovery|access_token/.test(window.location.hash || '');
+
+  const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_PUBLISHABLE_KEY);
+
+  /* ---------- Tiny helpers ---------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const num = v => { const n = Number(v); return isFinite(n) ? n : 0; };
+  const clamp = n => Math.max(0, Math.min(100, num(n)));
+  const cap = s => s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '';
+  const byId = id => state.entries.find(x => x.id === id);
+  const kids = (parentId, section) => state.entries.filter(x => x.parent_id === parentId && x.section === section);
+  const fmtDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString(undefined, {month:'short',day:'numeric',year:'numeric'}) : '';
+  const fmtLong = d => d ? new Date(d + 'T00:00:00').toLocaleDateString(undefined, {weekday:'long',month:'long',day:'numeric'}) : '';
+
+  // Days from today until a YYYY-MM-DD date (negative = overdue).
+  function daysLeft(dateStr){
+    if(!dateStr) return null;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const d = new Date(dateStr + 'T00:00:00');
+    if(isNaN(d)) return null;
+    return Math.round((d - today) / 86400000);
+  }
+  // Countdown text + tone: >7 days green, 1–7 yellow, overdue red.
+  function countdown(dateStr){
+    const n = daysLeft(dateStr);
+    if(n === null) return {text:'No date',tone:''};
+    if(n < 0) return {text:'Overdue ' + Math.abs(n) + ' ' + (Math.abs(n) === 1 ? 'day' : 'days'),tone:'bad'};
+    if(n === 0) return {text:'Due today',tone:'warn'};
+    if(n === 1) return {text:'Due tomorrow',tone:'warn'};
+    if(n <= 7) return {text:n + ' days',tone:'warn'};
+    return {text:n + ' days',tone:'ok'};
+  }
+
+  const STAGE_PCT = {idea:25, building:50, testing:75, done:100};
+  const STATUS_PCT = {planned:0, registered:25, submitted:75, result:100};
+  const STAGES = ['idea','building','testing','done'];
+  const STATUSES = ['planned','registered','submitted','result'];
+  const CATEGORIES = ['Award','Certificate','Competition win','Recognition','Project'];
+  const TONE = {ok:'#30D158', warn:'#FFD60A', bad:'#FF453A'};
+
+  /* ---------- Thin line icon set (one style, 1.5px stroke) ---------- */
+  const ICON_PATHS = {
+    grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    flask:'<path d="M9 3h6"/><path d="M10 3v6.5L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9.5V3"/><path d="M7.5 15h9"/>',
+    flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+    award:'<circle cx="12" cy="8" r="6"/><path d="M8.2 13.2 7 22l5-3 5 3-1.2-8.8"/>',
+    settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9.9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+    chevron:'<polyline points="9 18 15 12 9 6"/>',
+    search:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+    plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    close:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    more:'<circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/>',
+    calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+    upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+    link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+    pin:'<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+    list:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>'
+  };
+  function icon(name, size = 20){
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON_PATHS[name] || '') + '</svg>';
+  }
+
+  /* ---------- Chart primitives (SVG donut + thin bar) ---------- */
+  function donut(pct, opts = {}){
+    const size = opts.size || 48, stroke = opts.stroke || 6;
+    const r = (size - stroke) / 2 - 1, m = size / 2, c = 2 * Math.PI * r;
+    const p = clamp(pct), off = c * (1 - p / 100);
+    const label = opts.label !== undefined ? opts.label : (Math.round(p) + '%');
+    const fs = opts.fontSize || (size <= 42 ? 11 : 13);
+    return '<svg class="donut" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" role="img" aria-label="' + Math.round(p) + ' percent">' +
+      '<circle cx="' + m + '" cy="' + m + '" r="' + r + '" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="' + stroke + '"/>' +
+      '<circle cx="' + m + '" cy="' + m + '" r="' + r + '" fill="none" stroke="' + (opts.color || 'var(--accent)') + '" stroke-width="' + stroke + '" stroke-linecap="round" stroke-dasharray="' + c.toFixed(2) + '" stroke-dashoffset="' + off.toFixed(2) + '" transform="rotate(-90 ' + m + ' ' + m + ')"/>' +
+      (label !== '' ? '<text x="' + m + '" y="' + m + '" text-anchor="middle" dominant-baseline="central" fill="var(--text)" font-size="' + fs + '" font-weight="600">' + esc(label) + '</text>' : '') +
+      '</svg>';
+  }
+  function bar(pct, opts = {}){
+    const h = opts.height || 5, color = opts.color || 'var(--accent)';
+    return '<div class="bar" style="height:' + h + 'px" role="progressbar" aria-valuenow="' + Math.round(clamp(pct)) + '" aria-valuemin="0" aria-valuemax="100"><div class="bar-fill" style="width:' + clamp(pct) + '%;background:' + color + '"></div></div>';
+  }
+
+  /* ---------- State ---------- */
+  const state = {
+    user:null,
+    entries:[],
+    activeTab:'dashboard',
+    loading:true,
+    recoveryMode:RECOVERY_LINK,
+    search:{study:'',projects:'',competitions:'',achievements:''},
+    expanded:{subjects:new Set(),chapters:new Set()},
+    achFilter:{category:'',year:''}
+  };
+  let lastLoadedUserId = null;
+  let modalSubmit = null;
+
+  /* ---------- Feedback: toast + visible error banner ---------- */
+  function toast(msg, isError){
+    const el = document.createElement('div');
+    el.className = 'toast' + (isError ? ' error' : '');
+    el.textContent = msg;
+    $('#toast-root').appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+  function showError(msg){ $('#error-text').textContent = msg; $('#error-banner').hidden = false; }
+  function clearError(){ $('#error-banner').hidden = true; }
+
+  /* ---------- Auth ---------- */
+  function applySession(session){
+    const user = session && session.user ? session.user : null;
+    state.user = user;
+    $('#boot-screen').hidden = true;
+
+    // Recovery link: show the set-password flow; expired if there is no session.
+    if(state.recoveryMode){
+      $('#recovery-valid').hidden = !user;
+      $('#recovery-expired').hidden = !!user;
+      $('#recovery-screen').hidden = false;
+      $('#login-screen').hidden = true;
+      $('#app').hidden = true;
+      return;
+    }
+
+    const loggedIn = !!user;
+    $('#login-screen').hidden = loggedIn;
+    $('#recovery-screen').hidden = true;
+    $('#app').hidden = !loggedIn;
+
+    if(loggedIn){
+      if(lastLoadedUserId !== user.id){
+        lastLoadedUserId = user.id;
+        state.activeTab = 'dashboard';
+        setNavActive();
+        refreshData();
+      }
+    }else{
+      lastLoadedUserId = null;
+      state.entries = [];
+    }
+  }
+
+  // PASSWORD_RECOVERY fires after the emailed link is exchanged for a session.
+  supabase.auth.onAuthStateChange((event, session) => {
+    if(event === 'PASSWORD_RECOVERY'){
+      state.recoveryMode = true;
+      history.replaceState(null, '', location.pathname + location.search); // strip tokens from URL
+    }
+    if(event === 'SIGNED_OUT') state.recoveryMode = false;
+    applySession(session);
+  });
+
+  // Restore an existing session so a refresh never asks for the password again.
+  supabase.auth.getSession().then(({data}) => {
+    applySession(data.session);
+  }).catch(err => {
+    $('#boot-screen').hidden = true;
+    $('#login-screen').hidden = false;
+    showError('Could not restore session: ' + err.message);
+  });
+
+  function backToLogin(message){
+    state.recoveryMode = false;
+    $('#recovery-screen').hidden = true;
+    $('#app').hidden = true;
+    $('#login-screen').hidden = false;
+    $('#new-password').value = ''; $('#confirm-password').value = '';
+    $('#recovery-error').textContent = ''; $('#login-error').textContent = '';
+    if(message){ $('#login-notice').textContent = message; $('#login-notice').hidden = false; }
+  }
+  async function requestReset(){
+    const {error} = await supabase.auth.resetPasswordForEmail(CONFIG.LOGIN_EMAIL, {redirectTo:location.origin + location.pathname});
+    if(error) showError('Could not send reset email: ' + error.message);
+    else toast('Reset link sent. Check your inbox.');
+  }
+
+  $('#login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const pass = $('#login-password').value;
+    const err = $('#login-error'); err.textContent = '';
+    $('#login-notice').hidden = true;
+    const {error} = await supabase.auth.signInWithPassword({email:CONFIG.LOGIN_EMAIL,password:pass});
+    if(error){ err.textContent = 'Wrong password'; }
+    else { $('#login-password').value = ''; }
+  });
+  $('#recovery-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const p1 = $('#new-password').value, p2 = $('#confirm-password').value, err = $('#recovery-error');
+    err.textContent = '';
+    if(p1.length < 6){ err.textContent = 'Use at least 6 characters.'; return; }
+    if(p1 !== p2){ err.textContent = 'Passwords do not match.'; return; }
+    const {error} = await supabase.auth.updateUser({password:p1});
+    if(error){ err.textContent = error.message; return; }
+    await supabase.auth.signOut();
+    backToLogin('Password updated. Sign in with your new password.');
+  });
+
+  /* ==========================================================================
+     DATA LAYER — every query is scoped to the current user
+     ========================================================================== */
+  async function refreshData(opts){
+    opts = opts || {};
+    if(!state.user) return;
+    if(!opts.silent){ state.loading = true; renderCurrent(); }
+    clearError();
+    const {data, error} = await supabase.from('entries').select('*').eq('user_id', state.user.id);
+    if(error){ state.entries = []; showError('Could not load your data: ' + error.message); }
+    else { state.entries = data || []; }
+    state.loading = false;
+    renderCurrent();
+  }
+  async function saveEntry(payload, id){
+    try{
+      if(id){
+        const {error} = await supabase.from('entries').update(payload).eq('id', id).eq('user_id', state.user.id);
+        if(error) throw error;
+      }else{
+        const {error} = await supabase.from('entries').insert(Object.assign({user_id:state.user.id}, payload));
+        if(error) throw error;
+      }
+      closeSheet();
+      toast(id ? 'Changes saved' : 'Added');
+      await refreshData();
+    }catch(err){ showError('Could not save: ' + (err.message || err)); }
+  }
+  // Patch only the jsonb column (used by quick steppers, switches and checklists).
+  async function patchData(id, data){
+    const {error} = await supabase.from('entries').update({data:data}).eq('id', id).eq('user_id', state.user.id);
+    if(error) throw error;
+  }
+  async function removeEntry(id){
+    if(!window.confirm('Delete this item? This cannot be undone.')) return;
+    try{
+      // Delete children first so chapters/practicals are never orphaned.
+      let r = await supabase.from('entries').delete().eq('parent_id', id).eq('user_id', state.user.id);
+      if(r.error) throw r.error;
+      r = await supabase.from('entries').delete().eq('id', id).eq('user_id', state.user.id);
+      if(r.error) throw r.error;
+      toast('Deleted');
+      await refreshData();
+    }catch(err){ showError('Could not delete: ' + (err.message || err)); }
+  }
+
+  /* ---------- Computed progress ---------- */
+  function chapterStats(ch){
+    const d = ch.data || {}; let target = 0, done = 0;
+    ['cq','mcq','short'].forEach(t => { target += num(d[t] && d[t].target); done += num(d[t] && d[t].done); });
+    return {target,done,pct:target ? clamp(done / target * 100) : 0};
+  }
+  function subjectStats(s){
+    const chapters = kids(s.id, 'chapter');
+    let target = 0, done = 0;
+    chapters.forEach(ch => { const st = chapterStats(ch); target += st.target; done += st.done; });
+    const practicals = kids(s.id, 'practical');
+    const doneCount = practicals.length ? practicals.filter(p => p.data && p.data.done).length : num(s.data && s.data.practicalDone);
+    const total = num(s.data && s.data.practicalTotal);
+    return {chapters,practicals,target,done,pct:target ? clamp(done / target * 100) : 0,doneCount,total,
+      practicalPct:total ? clamp(doneCount / total * 100) : 0};
+  }
+  function overallStudyPct(){
+    let t = 0, d = 0;
+    state.entries.filter(e => e.section === 'chapter').forEach(ch => { const st = chapterStats(ch); t += st.target; d += st.done; });
+    return t ? clamp(d / t * 100) : 0;
+  }
+  // Aggregate the three question types across a subject's chapters.
+  function questionTotals(st){
+    const agg = {cq:{t:0,d:0},mcq:{t:0,d:0},short:{t:0,d:0}};
+    st.chapters.forEach(ch => {
+      const d = ch.data || {};
+      ['cq','mcq','short'].forEach(k => { agg[k].t += num(d[k] && d[k].target); agg[k].d += num(d[k] && d[k].done); });
+    });
+    return agg;
+  }
+  // Everything due within 30 days: chapter targets, exam dates, practicals, project + competition deadlines.
+  function buildUpcoming(){
+    const out = [];
+    const add = (date,label,section,tab,id) => {
+      const n = daysLeft(date);
+      if(n !== null && n >= 0 && n <= 30) out.push({date,label,section,tab,id,days:n});
+    };
+    state.entries.forEach(e => {
+      if(e.section === 'chapter'){
+        add(e.date,(e.title || 'Chapter') + ' · target','chapter','study',e.id);
+        if(e.data && e.data.exam) add(e.data.exam,(e.title || 'Chapter') + ' · exam','exam','study',e.id);
+      }
+      if(e.section === 'practical') add(e.date,(e.title || 'Practical') + ' · practical','practical','study',e.id);
+      if(e.section === 'project') add(e.date,(e.title || 'Project') + ' · deadline','project','projects',e.id);
+      if(e.section === 'competition'){
+        add(e.date,(e.title || 'Competition') + ' · submission','competition','competitions',e.id);
+        if(e.data && e.data.registration) add(e.data.registration,(e.title || 'Competition') + ' · registration','competition','competitions',e.id);
+      }
+    });
+    return out.sort((a,b) => a.date.localeCompare(b.date));
+  }
+
+  /* ---------- Navigation ---------- */
+  const NAV = [
+    {tab:'dashboard',label:'Dashboard',icon:'grid'},
+    {tab:'study',label:'Study',icon:'book'},
+    {tab:'projects',label:'Science Projects',short:'Projects',icon:'flask'},
+    {tab:'competitions',label:'Competitions',icon:'flag'},
+    {tab:'achievements',label:'Achievements',icon:'award'},
+    {tab:'settings',label:'Settings',icon:'settings'}
+  ];
+  function buildNav(){
+    $$('.sidebar nav .nav-row').forEach((btn, i) => {
+      const n = NAV[i];
+      btn.innerHTML = icon(n.icon,19) + '<span>' + n.label + '</span>';
+    });
+    $('.sidebar-footer .nav-row').innerHTML = icon('logout',19) + '<span>Logout</span>';
+    const tabs = $$('.tabbar .tab');
+    NAV.slice(0,4).forEach((n,i) => { tabs[i].innerHTML = icon(n.icon,22) + '<span>' + (n.short || n.label) + '</span>'; });
+    tabs[4].innerHTML = icon('more',22) + '<span>More</span>';
+    $('#login-icon').innerHTML = icon('lock',28);
+    $('#recovery-icon').innerHTML = icon('lock',28);
+  }
+  function setNavActive(){
+    $$('.nav-row[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === state.activeTab));
+    $$('.tab[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === state.activeTab));
+  }
+  function switchTab(tab){
+    closeSheet();
+    state.activeTab = tab;
+    setNavActive();
+    renderCurrent();
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+  // Open a row's detail in its own section and highlight it.
+  function gotoItem(tab, id){
+    if(tab === 'study'){
+      const item = byId(id);
+      if(item && item.parent_id) state.expanded.subjects.add(item.parent_id); // reveal the parent subject
+      if(item && item.section === 'chapter') state.expanded.chapters.add(id);
+    }
+    switchTab(tab);
+    setTimeout(() => {
+      const node = document.getElementById('item-' + id);
+      if(node){
+        node.scrollIntoView({behavior:'smooth',block:'center'});
+        node.classList.add('highlight');
+        setTimeout(() => node.classList.remove('highlight'), 1600);
+      }
+    }, 60);
+  }
+  function renderCurrent(){
+    if(!state.user) return;
+    ({dashboard:renderDashboard,study:renderStudy,projects:renderProjects,
+      competitions:renderCompetitions,achievements:renderAchievements,settings:renderSettings}[state.activeTab] || renderDashboard)();
+  }
+
+  /* ---------- Form + sheet helpers ---------- */
+  function fText(label,name,value,extra){
+    return '<label class="field"><span>' + label + '</span><input class="input" type="text" name="' + name + '" value="' + esc(value) + '" ' + (extra || '') + '></label>';
+  }
+  function fNum(label,name,value){
+    return '<label class="field"><span>' + label + '</span><input class="input" type="number" min="0" name="' + name + '" value="' + esc(value) + '"></label>';
+  }
+  function fDate(label,name,value){
+    return '<label class="field"><span>' + label + '</span><input class="input" type="date" name="' + name + '" value="' + esc(value) + '"></label>';
+  }
+  function fArea(label,name,value,extra){
+    return '<label class="field"><span>' + label + '</span><textarea name="' + name + '" ' + (extra || '') + '>' + esc(value) + '</textarea></label>';
+  }
+  // Segmented control (radio based) for stage / status.
+  function fSeg(name, options, value){
+    return '<div class="field"><span>' + name + '</span><div class="segmented">' + options.map(o => {
+      const v = typeof o === 'string' ? o : o.v, l = typeof o === 'string' ? cap(o) : o.l;
+      return '<label class="seg"><input type="radio" name="' + (name === 'Stage' ? 'stage' : name === 'Status' ? 'status' : 'category') + '" value="' + esc(v) + '"' + (v === value ? ' checked' : '') + '><span>' + esc(l) + '</span></label>';
+    }).join('') + '</div></div>';
+  }
+  // Bottom sheet on phones, centered panel on desktop. Cancel / Save in top corners.
+  function openSheet(title, bodyHtml, onSubmit){
+    modalSubmit = onSubmit || null;
+    $('#sheet-root').innerHTML =
+      '<div class="sheet-backdrop" data-backdrop>' +
+        '<div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(title) + '">' +
+          '<div class="sheet-head">' +
+            '<button type="button" class="sheet-side" data-action="close-sheet">Cancel</button>' +
+            '<h2>' + esc(title) + '</h2>' +
+            '<button type="submit" form="sheet-form" class="sheet-side save">Save</button>' +
+          '</div>' +
+          '<form id="sheet-form">' + bodyHtml + '</form>' +
+        '</div>' +
+      '</div>';
+    requestAnimationFrame(() => { const f = $('#sheet-form input:not([type=radio])'); if(f) f.focus(); });
+  }
+  function openActionSheet(title, bodyHtml){
+    $('#sheet-root').innerHTML =
+      '<div class="sheet-backdrop" data-backdrop>' +
+        '<div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(title) + '">' +
+          '<div class="sheet-head"><button type="button" class="sheet-side" data-action="close-sheet">Cancel</button>' +
+          '<h2>' + esc(title) + '</h2><span></span></div>' +
+          '<div class="action-body">' + bodyHtml + '</div>' +
+        '</div>' +
+      '</div>';
+  }
+  function closeSheet(){ $('#sheet-root').innerHTML = ''; modalSubmit = null; }
+  function emptyState(msg, action, label){
+    return '<div class="empty"><div>' + esc(msg) + '</div><button class="link-btn" data-action="' + action + '">' + esc(label) + '</button></div>';
+  }
+  const editBtn = (action,id) => '<button class="icon-btn" data-action="' + action + '" data-id="' + id + '" aria-label="Edit">' + icon('edit',17) + '</button>';
+  const delBtn = id => '<button class="icon-btn" data-action="delete" data-id="' + id + '" aria-label="Delete">' + icon('trash',17) + '</button>';
+
+  /* ==========================================================================
+     DASHBOARD — one page, no tab switching
+     ========================================================================== */
+  function statTile(label, value, sub, pct, centerLabel, color){
+    return '<div class="tile">' + donut(pct,{size:50,stroke:6,label:centerLabel,color:color,fontSize:13}) +
+      '<div class="tile-body"><div class="tile-label">' + esc(label) + '</div>' +
+      '<div class="tile-value">' + value + '</div><div class="tile-sub">' + sub + '</div></div></div>';
+  }
+  function skeletonDashboard(){
+    let s = '<div class="skeleton sk-line" style="width:220px;height:30px"></div><div class="skeleton sk-line" style="width:300px"></div><div class="stat-row">';
+    for(let i=0;i<5;i++) s += '<div class="skeleton sk-stat"></div>';
+    s += '</div><div class="grid">';
+    for(let i=0;i<4;i++) s += '<div class="panel"><div class="skeleton sk-line" style="width:45%"></div><div class="skeleton sk-line"></div><div class="skeleton sk-line" style="width:80%"></div></div>';
+    return s + '</div>';
+  }
+  function renderDashboard(){
+    const root = $('#section-root');
+    if(state.loading){ root.innerHTML = skeletonDashboard(); return; }
+
+    const subjects = state.entries.filter(e => e.section === 'subject');
+    const projects = state.entries.filter(e => e.section === 'project');
+    const competitions = state.entries.filter(e => e.section === 'competition');
+    const achievements = state.entries.filter(e => e.section === 'achievement');
+
+    const h = new Date().getHours();
+    const greeting = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+    const today = new Date().toLocaleDateString(undefined, {weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    const upcoming = buildUpcoming();
+    const dueWeek = upcoming.filter(it => it.days <= 7).length;
+
+    let html = '<div class="section-head"><div><h1 class="large-title">Good ' + greeting + '</h1>' +
+      '<p class="section-sub">' + esc(today) + ' · <span class="num">' + dueWeek + '</span> item' + (dueWeek === 1 ? '' : 's') + ' due this week</p></div></div>';
+
+    // Summary row: five compact tiles, each with a small donut + value.
+    const overall = overallStudyPct();
+    const projAvg = projects.length ? projects.reduce((a,p) => a + num(STAGE_PCT[(p.data||{}).stage]), 0) / projects.length : 0;
+    const activeComps = competitions.filter(c => (c.data||{}).status !== 'result');
+    const nextComp = activeComps.slice().sort((a,b) => (daysLeft(a.date) ?? 9999) - (daysLeft(b.date) ?? 9999))[0];
+    let pracDone = 0, pracTotal = 0;
+    subjects.forEach(s => { const st = subjectStats(s); pracDone += st.doneCount; pracTotal += st.total; });
+    const pracPct = pracTotal ? clamp(pracDone / pracTotal * 100) : 0;
+
+    html += '<div class="stat-row">' +
+      statTile('Study progress',Math.round(overall) + '%','across all chapters',overall,Math.round(overall) + '%') +
+      statTile('Projects average',Math.round(projAvg) + '%',projects.length + ' project' + (projects.length === 1 ? '' : 's'),projAvg,Math.round(projAvg) + '%') +
+      statTile('Active competitions',String(activeComps.length),nextComp ? 'Next: ' + esc(nextComp.title) : 'No deadlines',nextComp ? num(STATUS_PCT[(nextComp.data||{}).status]) : 0,String(activeComps.length)) +
+      statTile('Practicals done',pracDone + ' of ' + pracTotal,'planned practicals',pracPct,String(pracDone)) +
+      statTile('Achievements',String(achievements.length),'recorded all time',achievements.length ? 100 : 0,String(achievements.length)) +
+      '</div><div class="grid">';
+
+    // Study progress — weakest subject first, donut + CQ/MCQ/Short bars + practicals bar.
+    html += '<section class="panel"><div class="panel-head"><h2><span class="panel-icon">' + icon('book',18) + '</span> Study progress</h2><button class="link-btn" data-action="tab" data-tab="study">Manage</button></div>';
+    if(!subjects.length){
+      html += emptyState('No subjects yet. Add your first one to begin.','add-subject','+ Add subject');
+    }else{
+      html += '<div class="inset">' + subjects.slice().sort((a,b) => subjectStats(a).pct - subjectStats(b).pct).map(s => {
+        const st = subjectStats(s), agg = questionTotals(st);
+        return '<div class="inset-row tappable" data-action="goto" data-tab="study" data-id="' + s.id + '">' +
+          '<div style="width:100%"><div class="study-top"><span class="study-name">' + esc(s.title) + '</span>' + donut(st.pct,{size:44,stroke:5,label:Math.round(st.pct) + '%'}) + '</div>' +
+          '<div class="qbars">' + ['cq','mcq','short'].map(k => {
+            const label = k === 'cq' ? 'CQ' : k === 'mcq' ? 'MCQ' : 'Short';
+            const pct = agg[k].t ? clamp(agg[k].d / agg[k].t * 100) : 0;
+            return '<div><div class="qline-head"><span>' + label + '</span><span class="num">' + agg[k].d + ' / ' + agg[k].t + '</span></div>' + bar(pct,{height:4}) + '</div>';
+          }).join('') +
+          '<div><div class="qline-head"><span>Practicals</span><span class="num">' + st.doneCount + ' of ' + st.total + ' practicals done</span></div>' + bar(st.practicalPct,{height:4}) + '</div>' +
+          '</div></div></div>';
+      }).join('') + '</div>';
+    }
+    html += '</section>';
+
+    // Science projects — nearest deadline first, donut from stage.
+    html += '<section class="panel"><div class="panel-head"><h2><span class="panel-icon">' + icon('flask',18) + '</span> Science projects</h2><button class="link-btn" data-action="tab" data-tab="projects">Manage</button></div>';
+    if(!projects.length){
+      html += emptyState('No projects yet. Track your first one.','add-project','+ Add project');
+    }else{
+      html += '<div class="inset">' + projects.slice().sort((a,b) => (daysLeft(a.date) ?? 9999) - (daysLeft(b.date) ?? 9999)).map(p => {
+        const d = p.data || {}, stage = d.stage || 'idea', pct = num(STAGE_PCT[stage]);
+        return '<div class="inset-row tappable" data-action="goto" data-tab="projects" data-id="' + p.id + '">' +
+          '<div class="row-between"><div><div style="font-weight:600">' + esc(p.title) + '</div><div class="row-sub">' + esc(cap(stage)) + ' · ' + pct + '%' + (p.date ? ' · ' + esc(fmtDate(p.date)) : '') + '</div></div>' + donut(pct,{size:42,stroke:5,label:''}) + '</div></div>';
+      }).join('') + '</div>';
+    }
+    html += '</section>';
+
+    // Competitions — location, status donut, countdown, nearest deadline first.
+    html += '<section class="panel"><div class="panel-head"><h2><span class="panel-icon">' + icon('flag',18) + '</span> Competitions</h2><button class="link-btn" data-action="tab" data-tab="competitions">Manage</button></div>';
+    if(!competitions.length){
+      html += emptyState('No competitions yet. Add one to track deadlines.','add-competition','+ Add competition');
+    }else{
+      html += '<div class="inset">' + competitions.slice().sort((a,b) => (daysLeft(a.date) ?? 9999) - (daysLeft(b.date) ?? 9999)).map(c => {
+        const d = c.data || {}, status = d.status || 'planned', pct = num(STATUS_PCT[status]), cd = countdown(c.date);
+        return '<div class="inset-row tappable" data-action="goto" data-tab="competitions" data-id="' + c.id + '">' +
+          '<div class="row-between"><div style="min-width:0"><div style="font-weight:600">' + esc(c.title) + '</div><div class="row-sub">' + esc(d.location || 'No location') + '</div>' +
+          '<div class="row-sub">' + esc(cap(status)) + ' · ' + pct + '%</div></div><div class="row-right">' + donut(pct,{size:42,stroke:5,label:''}) + '<span class="countdown ' + cd.tone + '">' + esc(cd.text) + '</span></div></div></div>';
+      }).join('') + '</div>';
+    }
+    html += '</section>';
+
+    // Upcoming — grouped under day headers, coloured dot per section.
+    html += '<section class="panel"><div class="panel-head"><h2><span class="panel-icon">' + icon('calendar',18) + '</span> Upcoming · next 30 days</h2></div>';
+    if(!upcoming.length){
+      html += '<div class="empty"><div>Nothing due in the next 30 days.</div></div>';
+    }else{
+      const groups = {};
+      upcoming.forEach(it => { (groups[it.date] = groups[it.date] || []).push(it); });
+      Object.keys(groups).sort().forEach(day => {
+        html += '<div class="day-head">' + esc(fmtLong(day)) + '</div><div class="inset">' + groups[day].map(it => {
+          const rel = it.days === 0 ? 'Today' : it.days === 1 ? 'Tomorrow' : it.days + 'd';
+          return '<div class="inset-row tappable" data-action="goto" data-tab="' + it.tab + '" data-id="' + it.id + '"><span class="section-dot ' + it.section + '"></span><span class="row-main">' + esc(it.label) + '</span><span class="row-sub num">' + rel + '</span></div>';
+        }).join('') + '</div>';
+      });
+    }
+    html += '</section>';
+
+    // Achievements — 3 most recent + category counts as secondary labels.
+    html += '<section class="panel"><div class="panel-head"><h2><span class="panel-icon">' + icon('award',18) + '</span> Achievements</h2><button class="link-btn" data-action="tab" data-tab="achievements">Manage</button></div>';
+    if(!achievements.length){
+      html += emptyState('No achievements yet. Record your first win.','add-achievement','+ Add achievement');
+    }else{
+      html += '<div class="inset">' + achievements.slice().sort((a,b) => (b.date || '').localeCompare(a.date || '')).slice(0,3).map(a => {
+        const d = a.data || {};
+        return '<div class="inset-row tappable" data-action="goto" data-tab="achievements" data-id="' + a.id + '"><span class="row-main">' + esc(a.title) + '</span><span class="row-sub">' + esc(cap(d.category || 'achievement')) + ' · ' + esc(fmtDate(a.date)) + '</span></div>';
+      }).join('') + '</div>';
+      html += '<div class="category-counts">' + CATEGORIES.map(c => esc(c) + ' <span class="num">' + achievements.filter(a => (a.data||{}).category === c).length + '</span>').join(' &nbsp;·&nbsp; ') + '</div>';
+    }
+    html += '</section></div>';
+
+    root.innerHTML = html;
+  }
+
+  /* ==========================================================================
+     STUDY — subjects > chapters + practicals
+     ========================================================================== */
+  function renderStudy(){
+    $('#section-root').innerHTML =
+      '<div class="section-head"><div><h1 class="large-title">Study</h1><p class="section-sub">Subjects, chapters, questions and practicals</p></div>' +
+      '<div class="head-actions"><input class="search" data-search="study" placeholder="Search study…" value="' + esc(state.search.study) + '"><button class="btn primary" data-action="add-subject">' + icon('plus',17) + ' Subject</button></div></div>' +
+      '<div id="study-list"></div>';
+    renderStudyList();
+  }
+  function renderStudyList(){
+    const q = state.search.study.trim().toLowerCase();
+    let subjects = state.entries.filter(e => e.section === 'subject');
+    if(q) subjects = subjects.filter(s => s.title.toLowerCase().includes(q) ||
+      kids(s.id,'chapter').some(c => c.title.toLowerCase().includes(q)) ||
+      kids(s.id,'practical').some(p => p.title.toLowerCase().includes(q)));
+    const root = $('#study-list'); if(!root) return;
+    if(!subjects.length){ root.innerHTML = emptyState(q ? 'No subjects match your search.' : 'No subjects yet. Add your first subject.','add-subject','+ Add subject'); return; }
+
+    root.innerHTML = subjects.map(s => {
+      const st = subjectStats(s), open = state.expanded.subjects.has(s.id);
+      let h = '<div class="card subject-card" id="item-' + s.id + '">' +
+        '<div class="subject-head tappable" data-action="toggle-subject" data-id="' + s.id + '"><span class="chev' + (open ? ' open' : '') + '">' + icon('chevron',16) + '</span>' +
+        '<span class="subject-name">' + esc(s.title) + '</span><span class="subject-pct num">' + Math.round(st.pct) + '%</span></div>';
+      if(open){
+        h += '<div class="card-body">' +
+          '<div class="subblock"><div class="subblock-title"><span>Overall questions</span><span class="num">' + st.done + ' / ' + st.target + '</span></div>' + bar(st.pct) + '</div>' +
+
+          '<div class="subblock"><div class="subblock-title"><span>Practicals · ' + st.doneCount + ' of ' + st.total + ' done</span><button class="link-btn" data-action="add-practical" data-id="' + s.id + '">+ Practical</button></div>' + bar(st.practicalPct) +
+          '<div style="margin-top:10px">' + (st.practicals.length ? st.practicals.sort((a,b) => (a.date || '').localeCompare(b.date || '')).map(p => {
+            const done = !!(p.data && p.data.done);
+            return '<div class="practical-row' + (done ? ' done' : '') + '">' +
+              '<label class="switch" aria-label="Mark practical done"><input type="checkbox" data-action="toggle-practical" data-id="' + p.id + '"' + (done ? ' checked' : '') + '><span class="switch-track"><span class="switch-thumb"></span></span></label>' +
+              '<span class="name">' + esc(p.title) + '</span><span class="date">' + esc(fmtDate(p.date)) + '</span>' +
+              '<span class="row-actions">' + editBtn('edit-practical',p.id) + delBtn(p.id) + '</span></div>';
+          }).join('') : '<div class="muted small" style="padding:8px 0">No practicals added.</div>') + '</div></div>' +
+
+          '<div class="subblock"><div class="subblock-title"><span>Chapters (' + st.chapters.length + ')</span><button class="link-btn" data-action="add-chapter" data-id="' + s.id + '">+ Chapter</button></div>' +
+          (st.chapters.length ? st.chapters.sort((a,b) => num((a.data||{}).number) - num((b.data||{}).number)).map(renderChapter).join('') : '<div class="muted small" style="padding:8px 0">No chapters added yet.</div>') + '</div>' +
+
+          '<div class="subblock" style="display:flex;gap:8px"><button class="btn ghost small" data-action="edit-subject" data-id="' + s.id + '">Edit subject</button><button class="btn danger small" data-action="delete" data-id="' + s.id + '">Delete subject</button></div>' +
+          '</div>';
+      }
+      return h + '</div>';
+    }).join('');
+  }
+  function renderChapter(ch){
+    const d = ch.data || {}, open = state.expanded.chapters.has(ch.id), pct = chapterStats(ch).pct;
+    let h = '<div class="chapter-card" id="item-' + ch.id + '"><div class="chapter-head tappable" data-action="toggle-chapter" data-id="' + ch.id + '">' +
+      '<span class="chev' + (open ? ' open' : '') + '">' + icon('chevron',15) + '</span>' +
+      (d.number ? '<span class="number-pill">' + esc(d.number) + '</span>' : '') +
+      '<span class="chapter-name">' + esc(ch.title) + '</span><span class="subject-pct num">' + Math.round(pct) + '%</span></div>';
+    if(open){
+      h += '<div class="chapter-body">' + ['cq','mcq','short'].map(t => {
+        const td = d[t] || {}, target = num(td.target), done = num(td.done);
+        const name = t === 'cq' ? 'CQ' : t === 'mcq' ? 'MCQ' : 'Short';
+        return '<div class="qtype"><div class="qtype-head"><span class="qtype-name">' + name + '</span>' +
+          '<span class="stepper"><button class="step-btn" data-action="bump" data-id="' + ch.id + '" data-type="' + t + '" data-field="done" data-delta="-1" aria-label="Decrease ' + name + ' done">−</button>' +
+          '<span class="step-val num">' + done + '</span><button class="step-btn" data-action="bump" data-id="' + ch.id + '" data-type="' + t + '" data-field="done" data-delta="1" aria-label="Increase ' + name + ' done">+</button></span>' +
+          '<span class="qtype-target num">/ ' + target + '</span>' +
+          '<span class="stepper target"><button class="step-btn" data-action="bump" data-id="' + ch.id + '" data-type="' + t + '" data-field="target" data-delta="-1" aria-label="Decrease ' + name + ' target">−</button>' +
+          '<button class="step-btn" data-action="bump" data-id="' + ch.id + '" data-type="' + t + '" data-field="target" data-delta="1" aria-label="Increase ' + name + ' target">+</button></span></div>' +
+          bar(target ? clamp(done / target * 100) : 0,{height:4}) + '</div>';
+      }).join('') +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px"><span class="muted small">' +
+      (ch.date ? 'Target ' + esc(fmtDate(ch.date)) : '') + (d.exam ? ' · Exam ' + esc(fmtDate(d.exam)) : '') + (!ch.date && !d.exam ? 'No dates set' : '') +
+      '</span><span class="row-actions">' + editBtn('edit-chapter',ch.id) + delBtn(ch.id) + '</span></div></div>';
+    }
+    return h + '</div>';
+  }
+
+  // Study forms
+  function subjectForm(s){
+    const d = (s && s.data) || {};
+    openSheet(s ? 'Edit subject' : 'New subject', '<div class="fields">' +
+      fText('Name','name',s ? s.title : '') +
+      fNum('Total HSC practicals','practicalTotal',num(d.practicalTotal)) +
+      fNum('Practicals done','practicalDone',num(d.practicalDone)) + '</div>',
+      fd => saveEntry({section:'subject',title:fd.get('name').trim(),date:null,parent_id:null,
+        data:{practicalTotal:num(fd.get('practicalTotal')),practicalDone:num(fd.get('practicalDone'))}},s ? s.id : null));
+  }
+  function chapterForm(ch, subjectId){
+    const d = (ch && ch.data) || {};
+    openSheet(ch ? 'Edit chapter' : 'New chapter', '<div class="fields">' +
+      fText('Name','name',ch ? ch.title : '') + fText('Number / code','number',d.number || '') +
+      fDate('Target date','date',ch && ch.date ? ch.date : '') + fDate('Exam date','exam',d.exam || '') +
+      ['cq','mcq','short'].map(k => {
+        const label = k === 'cq' ? 'CQ' : k === 'mcq' ? 'MCQ' : 'Short';
+        return '<div class="field"><span>' + label + ' (done / target)</span><div style="display:flex;gap:8px">' +
+          '<input class="input" type="number" min="0" name="done_' + k + '" placeholder="Done" value="' + num((d[k]||{}).done) + '">' +
+          '<input class="input" type="number" min="0" name="target_' + k + '" placeholder="Target" value="' + num((d[k]||{}).target) + '"></div></div>';
+      }).join('') + '</div>',
+      fd => saveEntry({section:'chapter',title:fd.get('name').trim(),date:fd.get('date') || null,parent_id:subjectId,
+        data:{number:fd.get('number').trim(),exam:fd.get('exam') || null,
+          cq:{target:num(fd.get('target_cq')),done:num(fd.get('done_cq'))},
+          mcq:{target:num(fd.get('target_mcq')),done:num(fd.get('done_mcq'))},
+          short:{target:num(fd.get('target_short')),done:num(fd.get('done_short'))}}},ch ? ch.id : null));
+  }
+  function practicalForm(p, subjectId){
+    const d = (p && p.data) || {};
+    openSheet(p ? 'Edit practical' : 'New practical', '<div class="fields">' +
+      fText('Name','name',p ? p.title : '') + fDate('Date','date',p && p.date ? p.date : '') +
+      '<div class="field"><span>Status</span><label style="display:flex;align-items:center;gap:10px;color:var(--text);cursor:pointer"><input type="checkbox" name="done"' + (d.done ? ' checked' : '') + '> Done</label></div></div>',
+      fd => saveEntry({section:'practical',title:fd.get('name').trim(),date:fd.get('date') || null,parent_id:subjectId,
+        data:{done:fd.has('done')}},p ? p.id : null));
+  }
+
+  /* ==========================================================================
+     SCIENCE PROJECTS
+     ========================================================================== */
+  function renderProjects(){
+    $('#section-root').innerHTML =
+      '<div class="section-head"><div><h1 class="large-title">Science Projects</h1><p class="section-sub">Stage-based progress for every project</p></div>' +
+      '<div class="head-actions"><input class="search" data-search="projects" placeholder="Search projects…" value="' + esc(state.search.projects) + '"><button class="btn primary" data-action="add-project">' + icon('plus',17) + ' Project</button></div></div>' +
+      '<div id="projects-list"></div>';
+    renderProjectsList();
+  }
+  function renderProjectsList(){
+    const q = state.search.projects.trim().toLowerCase();
+    let items = state.entries.filter(e => e.section === 'project');
+    if(q) items = items.filter(p => p.title.toLowerCase().includes(q) || String((p.data||{}).notes || '').toLowerCase().includes(q));
+    items = items.sort((a,b) => (daysLeft(a.date) ?? 9999) - (daysLeft(b.date) ?? 9999));
+    const root = $('#projects-list'); if(!root) return;
+    if(!items.length){ root.innerHTML = emptyState(q ? 'No projects match your search.' : 'No projects yet. Add your first one.','add-project','+ Add project'); return; }
+    root.innerHTML = '<div class="grid">' + items.map(p => {
+      const d = p.data || {}, stage = d.stage || 'idea', pct = num(STAGE_PCT[stage]), cd = countdown(p.date);
+      return '<div class="card item-card tappable" id="item-' + p.id + '">' +
+        '<div class="item-top"><h3 class="item-title">' + esc(p.title) + '</h3><span class="row-actions">' + editBtn('edit-project',p.id) + delBtn(p.id) + '</span></div>' +
+        '<div class="item-meta">' + donut(pct,{size:44,stroke:5,label:pct + '%'}) +
+          '<div><div class="stage-pill">' + esc(cap(stage)) + '</div><div class="row-sub">' + (d.startDate ? 'Started ' + esc(fmtDate(d.startDate)) : '') + (p.date ? ' · Deadline ' + esc(fmtDate(p.date)) : '') + '</div>' +
+          '<div class="countdown ' + cd.tone + '">' + esc(cd.text) + '</div></div></div>' +
+        (d.notes ? '<p class="item-notes">' + esc(d.notes) + '</p>' : '') +
+        (d.link ? '<div class="item-link">' + icon('link',15) + ' <a href="' + esc(d.link) + '" target="_blank" rel="noopener noreferrer">' + esc(d.link) + '</a></div>' : '') +
+        '</div>';
+    }).join('') + '</div>';
+  }
+  function projectForm(p){
+    const d = (p && p.data) || {};
+    openSheet(p ? 'Edit project' : 'New project', '<div class="fields">' +
+      fText('Name','name',p ? p.title : '') + fSeg('Stage',STAGES,d.stage || 'idea') +
+      fDate('Start date','startDate',d.startDate || '') + fDate('Deadline','deadline',p && p.date ? p.date : '') +
+      fText('Link (optional)','link',d.link || '', 'placeholder="https://…"') + fArea('Notes','notes',d.notes || '') + '</div>',
+      fd => saveEntry({section:'project',title:fd.get('name').trim(),date:fd.get('deadline') || null,parent_id:null,
+        data:{stage:fd.get('stage'),startDate:fd.get('startDate'),notes:fd.get('notes').trim(),link:fd.get('link').trim()}},p ? p.id : null));
+  }
+
+  /* ==========================================================================
+     COMPETITIONS — upcoming first, past grouped below
+     ========================================================================== */
+  function competitionCard(c){
+    const d = c.data || {}, status = d.status || 'planned', pct = num(STATUS_PCT[status]), cd = countdown(c.date), tasks = d.tasks || [];
+    return '<div class="card item-card tappable" id="item-' + c.id + '">' +
+      '<div class="item-top"><h3 class="item-title">' + esc(c.title) + '</h3><span class="row-actions">' + editBtn('edit-competition',c.id) + delBtn(c.id) + '</span></div>' +
+      '<div class="item-meta">' + icon('pin',15) + '<span class="row-sub">' + esc(d.location || 'No location') + '</span></div>' +
+      '<div class="item-meta">' + donut(pct,{size:44,stroke:5,label:pct + '%'}) +
+        '<div><div class="stage-pill">' + esc(cap(status)) + '</div><div class="countdown ' + cd.tone + '">' + esc(cd.text) + '</div></div></div>' +
+      '<div class="item-meta"><span class="row-sub">' + (d.registration ? 'Registered by ' + esc(fmtDate(d.registration)) : '') + (c.date ? ' · Submission ' + esc(fmtDate(c.date)) : '') + '</span></div>' +
+      (d.notes ? '<p class="item-notes">' + esc(d.notes) + '</p>' : '') +
+      (tasks.length ? '<div style="margin-top:12px"><div class="subblock-title"><span>Tasks</span></div>' + tasks.map((t,i) =>
+        '<label class="task' + (t.done ? ' done' : '') + '"><input type="checkbox" data-action="toggle-task" data-id="' + c.id + '" data-index="' + i + '"' + (t.done ? ' checked' : '') + '><span>' + esc(t.text) + '</span></label>').join('') + '</div>' : '') +
+      '</div>';
+  }
+  function renderCompetitions(){
+    $('#section-root').innerHTML =
+      '<div class="section-head"><div><h1 class="large-title">Competitions</h1><p class="section-sub">Deadlines, status and task checklists</p></div>' +
+      '<div class="head-actions"><input class="search" data-search="competitions" placeholder="Search competitions…" value="' + esc(state.search.competitions) + '"><button class="btn primary" data-action="add-competition">' + icon('plus',17) + ' Competition</button></div></div>' +
+      '<div id="competitions-list"></div>';
+    renderCompetitionsList();
+  }
+  function renderCompetitionsList(){
+    const q = state.search.competitions.trim().toLowerCase();
+    let items = state.entries.filter(e => e.section === 'competition');
+    if(q) items = items.filter(c => c.title.toLowerCase().includes(q) || String((c.data||{}).location || '').toLowerCase().includes(q));
+    items = items.sort((a,b) => (daysLeft(a.date) ?? 9999) - (daysLeft(b.date) ?? 9999));
+    const root = $('#competitions-list'); if(!root) return;
+    if(!items.length){ root.innerHTML = emptyState(q ? 'No competitions match your search.' : 'No competitions yet. Add your first one.','add-competition','+ Add competition'); return; }
+    const upcoming = items.filter(c => { const n = daysLeft(c.date); return n === null || n >= 0; });
+    const past = items.filter(c => { const n = daysLeft(c.date); return n !== null && n < 0; });
+    let html = '<div class="grid">' + upcoming.map(competitionCard).join('') + '</div>';
+    if(past.length) html += '<div class="divider-label">Past</div><div class="grid">' + past.map(competitionCard).join('') + '</div>';
+    root.innerHTML = html;
+  }
+  function competitionForm(c){
+    const d = (c && c.data) || {}, tasks = d.tasks || [];
+    openSheet(c ? 'Edit competition' : 'New competition', '<div class="fields">' +
+      fText('Name','name',c ? c.title : '') + fText('Location','location',d.location || '', 'placeholder="Dhaka, BSMMU Auditorium or Online"') +
+      fSeg('Status',STATUSES,d.status || 'planned') +
+      fDate('Registration deadline','registration',d.registration || '') + fDate('Submission deadline','submission',c && c.date ? c.date : '') +
+      fArea('Notes','notes',d.notes || '') +
+      fArea('Tasks (one per line)','tasks',tasks.map(t => t.text).join('\n'),'placeholder="Register\nPrepare poster\nSubmit"') + '</div>',
+      fd => {
+        const newTasks = fd.get('tasks').split('\n').map(x => x.trim()).filter(Boolean).map(text => ({text,done:tasks.some(t => t.text === text && t.done)}));
+        return saveEntry({section:'competition',title:fd.get('name').trim(),date:fd.get('submission') || null,parent_id:null,
+          data:{location:fd.get('location').trim(),status:fd.get('status'),registration:fd.get('registration') || null,notes:fd.get('notes').trim(),tasks:newTasks}},c ? c.id : null);
+      });
+  }
+
+  /* ==========================================================================
+     ACHIEVEMENTS — thin-bordered cards, segmented category/year filters
+     ========================================================================== */
+  function achievementYears(){
+    const ys = state.entries.filter(e => e.section === 'achievement' && e.date).map(e => new Date(e.date).getFullYear());
+    return Array.from(new Set(ys)).sort((a,b) => b-a);
+  }
+  function filterSegmented(){
+    const cats = [{v:'',l:'All'}].concat(CATEGORIES.map(c => ({v:c,l:c})));
+    const years = [{v:'',l:'All'}].concat(achievementYears().map(y => ({v:String(y),l:String(y)})));
+    const seg = (label, key, options) => '<div class="field"><span>' + label + '</span><div class="segmented filter">' + options.map(o =>
+      '<button class="link-btn seg-btn' + (state.achFilter[key] === o.v ? ' active' : '') + '" data-action="filter" data-key="' + key + '" data-value="' + esc(o.v) + '" style="padding:6px 12px;color:' + (state.achFilter[key] === o.v ? 'var(--text)' : 'var(--secondary)') + '">' + esc(o.l) + '</button>').join('') + '</div></div>';
+    return '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px">' + seg('Category','category',cats) + seg('Year','year',years) + '</div>';
+  }
+  function renderAchievements(){
+    $('#section-root').innerHTML =
+      '<div class="section-head"><div><h1 class="large-title">Achievements</h1><p class="section-sub">Your wins, awards and recognition</p></div>' +
+      '<div class="head-actions"><input class="search" data-search="achievements" placeholder="Search achievements…" value="' + esc(state.search.achievements) + '"><button class="btn primary" data-action="add-achievement">' + icon('plus',17) + ' Achievement</button></div></div>' +
+      filterSegmented() + '<div id="achievements-list"></div>';
+    renderAchievementsList();
+  }
+  function renderAchievementsList(){
+    const q = state.search.achievements.trim().toLowerCase();
+    let items = state.entries.filter(e => e.section === 'achievement');
+    if(state.achFilter.category) items = items.filter(a => (a.data||{}).category === state.achFilter.category);
+    if(state.achFilter.year) items = items.filter(a => a.date && String(new Date(a.date).getFullYear()) === state.achFilter.year);
+    if(q) items = items.filter(a => a.title.toLowerCase().includes(q) || String((a.data||{}).description || '').toLowerCase().includes(q));
+    items = items.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+    const root = $('#achievements-list'); if(!root) return;
+    if(!items.length){ root.innerHTML = emptyState(q || state.achFilter.category || state.achFilter.year ? 'No achievements match these filters.' : 'No achievements yet. Record your first win.','add-achievement','+ Add achievement'); return; }
+    root.innerHTML = '<div class="achievement-list">' + items.map(a => {
+      const d = a.data || {}, tags = d.tags || [];
+      return '<div class="card item-card" id="item-' + a.id + '">' +
+        '<div class="item-top"><h3 class="item-title">' + esc(a.title) + '</h3><span class="row-actions">' + editBtn('edit-achievement',a.id) + delBtn(a.id) + '</span></div>' +
+        '<div class="item-meta"><span class="row-sub">' + esc(cap(d.category || 'achievement')) + '</span><span class="row-sub">' + esc(fmtDate(a.date)) + '</span>' + (d.organization ? '<span class="row-sub">' + esc(d.organization) + '</span>' : '') + '</div>' +
+        (d.description ? '<p class="item-notes">' + esc(d.description) + '</p>' : '') +
+        (tags.length ? '<div class="tags">' + tags.map(t => '<span class="tag">#' + esc(t) + '</span>').join('') + '</div>' : '') +
+        (d.proofLink ? '<div class="item-link">' + icon('link',15) + ' <a href="' + esc(d.proofLink) + '" target="_blank" rel="noopener noreferrer">Proof / link</a></div>' : '') +
+        '</div>';
+    }).join('') + '</div>';
+  }
+  function achievementForm(a){
+    const d = (a && a.data) || {};
+    openSheet(a ? 'Edit achievement' : 'New achievement', '<div class="fields">' +
+      fText('Title','title',a ? a.title : '') + fSeg('Category',CATEGORIES,d.category || CATEGORIES[0]) +
+      fDate('Date','date',a && a.date ? a.date : '') + fText('Organization','organization',d.organization || '') +
+      fText('Proof link','proofLink',d.proofLink || '', 'placeholder="https://…"') +
+      fText('Tags (comma separated)','tags',(d.tags || []).join(', ')) + fArea('Description','description',d.description || '') + '</div>',
+      fd => saveEntry({section:'achievement',title:fd.get('title').trim(),date:fd.get('date') || null,parent_id:null,
+        data:{category:fd.get('category'),organization:fd.get('organization').trim(),description:fd.get('description').trim(),
+          proofLink:fd.get('proofLink').trim(),tags:fd.get('tags').split(',').map(t => t.trim()).filter(Boolean)}},a ? a.id : null));
+  }
+
+  /* ==========================================================================
+     SETTINGS — grouped-list rows for Export / Import
+     ========================================================================== */
+  function renderSettings(){
+    $('#section-root').innerHTML =
+      '<div class="section-head"><div><h1 class="large-title">Settings</h1><p class="section-sub">Back up and restore your data</p></div></div>' +
+      '<div class="group-label">Data</div><div class="inset">' +
+        '<button class="inset-row tappable" data-action="export">' + icon('download',19) + '<span class="row-main">Export all data</span><span class="chev">' + icon('chevron',16) + '</span></button>' +
+        '<button class="inset-row tappable" data-action="import">' + icon('upload',19) + '<span class="row-main">Import from JSON file</span><span class="chev">' + icon('chevron',16) + '</span></button>' +
+      '</div>' +
+      '<div class="group-label">Privacy</div><div class="inset"><div class="inset-row static">' + icon('lock',19) + '<span class="row-main muted small">Your data lives only in your private Supabase table — never in browser storage.</span></div></div>';
+  }
+  function exportData(){
+    const payload = {app:'YoushaLab',exportedAt:new Date().toISOString(),user_id:state.user.id,entries:state.entries};
+    const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'youshalab-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    toast('Backup downloaded');
+  }
+  // Import recreates every entry with a fresh id and re-links parent_id references.
+  async function importData(rows){
+    if(!Array.isArray(rows) || !rows.length){ showError('That file contains no entries.'); return; }
+    if(!window.confirm('Import ' + rows.length + ' entries? Existing data will be kept.')) return;
+    const idMap = new Map(), ids = new Set(rows.map(r => r.id));
+    let pending = rows.slice(), guard = 0;
+    try{
+      clearError();
+      while(pending.length && guard++ < rows.length + 2){
+        const next = [];
+        for(const r of pending){
+          if(r.parent_id && ids.has(r.parent_id) && !idMap.has(r.parent_id)){ next.push(r); continue; }
+          const parent = r.parent_id ? (idMap.has(r.parent_id) ? idMap.get(r.parent_id) : r.parent_id) : null;
+          const {data,error} = await supabase.from('entries').insert({section:r.section,title:r.title || '',date:r.date || null,
+            parent_id:parent,data:(r.data && typeof r.data === 'object') ? r.data : {},user_id:state.user.id}).select().single();
+          if(error) throw error;
+          if(r.id != null && data && data.id) idMap.set(r.id,data.id);
+        }
+        if(next.length === pending.length){ // unresolvable/circular parents: insert as-is
+          for(const r of next){
+            const {data,error} = await supabase.from('entries').insert({section:r.section,title:r.title || '',date:r.date || null,
+              parent_id:r.parent_id || null,data:(r.data && typeof r.data === 'object') ? r.data : {},user_id:state.user.id}).select().single();
+            if(error) throw error;
+            if(r.id != null && data && data.id) idMap.set(r.id,data.id);
+          }
+          break;
+        }
+        pending = next;
+      }
+      toast('Imported ' + rows.length + ' entries');
+      await refreshData();
+    }catch(err){ showError('Import failed: ' + (err.message || err)); }
+  }
+
+  /* ==========================================================================
+     EVENTS
+     ========================================================================== */
+  function openMoreSheet(){
+    openActionSheet('More',
+      '<div class="group-label">Navigate</div><div class="inset">' +
+        '<button class="inset-row tappable" data-action="tab" data-tab="achievements">' + icon('award',19) + '<span class="row-main">Achievements</span></button>' +
+        '<button class="inset-row tappable" data-action="tab" data-tab="settings">' + icon('settings',19) + '<span class="row-main">Settings</span></button>' +
+      '</div><div class="group-label">Account</div><div class="inset">' +
+        '<button class="inset-row tappable" data-action="logout" style="color:var(--red)">' + icon('logout',19) + '<span class="row-main">Logout</span></button>' +
+      '</div>');
+  }
+  document.addEventListener('click', e => {
+    if(e.target.matches('[data-backdrop]')){ closeSheet(); return; }
+    if(e.target.closest('input,select,textarea')) return; // let change handlers own form controls
+    const el = e.target.closest('[data-action]'); if(!el) return;
+    const a = el.dataset.action, id = num(el.dataset.id);
+    switch(a){
+      case 'dismiss-error': clearError(); break;
+      case 'close-sheet': closeSheet(); break;
+      case 'forgot': case 'request-reset': requestReset(); break;
+      case 'back-login': backToLogin(); break;
+      case 'logout': supabase.auth.signOut(); break;
+      case 'tab': switchTab(el.dataset.tab); break;
+      case 'more': openMoreSheet(); break;
+      case 'goto': gotoItem(el.dataset.tab,id); break;
+      case 'filter':
+        state.achFilter[el.dataset.key] = el.dataset.value;
+        renderAchievements(); break;
+
+      case 'add-subject': subjectForm(null); break;
+      case 'add-chapter': chapterForm(null,id); break;
+      case 'add-practical': practicalForm(null,id); break;
+      case 'add-project': projectForm(null); break;
+      case 'add-competition': competitionForm(null); break;
+      case 'add-achievement': achievementForm(null); break;
+
+      case 'edit-subject': subjectForm(byId(id)); break;
+      case 'edit-chapter': { const c = byId(id); chapterForm(c,c ? c.parent_id : null); break; }
+      case 'edit-practical': { const p = byId(id); practicalForm(p,p ? p.parent_id : null); break; }
+      case 'edit-project': projectForm(byId(id)); break;
+      case 'edit-competition': competitionForm(byId(id)); break;
+      case 'edit-achievement': achievementForm(byId(id)); break;
+      case 'delete': removeEntry(id); break;
+
+      case 'toggle-subject':
+        state.expanded.subjects.has(id) ? state.expanded.subjects.delete(id) : state.expanded.subjects.add(id);
+        renderStudyList(); break;
+      case 'toggle-chapter':
+        state.expanded.chapters.has(id) ? state.expanded.chapters.delete(id) : state.expanded.chapters.add(id);
+        renderStudyList(); break;
+      case 'bump': bump(id,el.dataset.type,el.dataset.field,num(el.dataset.delta)); break;
+
+      case 'export': exportData(); break;
+      case 'import': $('#import-file').click(); break;
+    }
+  });
+  document.addEventListener('submit', e => {
+    if(e.target.id === 'sheet-form'){
+      e.preventDefault();
+      if(modalSubmit) modalSubmit(new FormData(e.target));
+    }
+  });
+  document.addEventListener('input', e => {
+    const key = e.target.dataset.search; if(!key) return;
+    state.search[key] = e.target.value;
+    ({study:renderStudyList,projects:renderProjectsList,competitions:renderCompetitionsList,achievements:renderAchievementsList})[key]();
+  });
+  document.addEventListener('change', async e => {
+    const a = e.target.dataset.action;
+    if(a === 'toggle-practical'){ await togglePractical(num(e.target.dataset.id),e.target.checked); return; }
+    if(a === 'toggle-task'){ await toggleTask(num(e.target.dataset.id),num(e.target.dataset.index),e.target.checked); return; }
+    if(e.target.id === 'import-file'){
+      const file = e.target.files && e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{ const parsed = JSON.parse(reader.result); importData(Array.isArray(parsed) ? parsed : parsed.entries); }
+        catch(err){ showError('Could not read that JSON file: ' + err.message); }
+      };
+      reader.readAsText(file); e.target.value = '';
+    }
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSheet(); });
+
+  /* ---------- Quick mutations ---------- */
+  async function bump(id, type, field, delta){
+    const e = byId(id); if(!e) return;
+    const d = JSON.parse(JSON.stringify(e.data || {}));
+    d[type] = d[type] || {target:0,done:0};
+    d[type][field] = Math.max(0,num(d[type][field]) + delta);
+    try{ await patchData(id,d); await refreshData({silent:true}); }
+    catch(err){ showError('Could not update: ' + (err.message || err)); }
+  }
+  async function togglePractical(id, checked){
+    try{
+      await patchData(id,Object.assign({},(byId(id)||{}).data,{done:checked}));
+      const p = byId(id);
+      if(p && p.parent_id){
+        const sibs = kids(p.parent_id,'practical');
+        const doneCount = sibs.filter(x => x.id === id ? checked : !!(x.data && x.data.done)).length;
+        const subj = byId(p.parent_id);
+        if(subj) await patchData(subj.id,Object.assign({},subj.data,{practicalDone:doneCount}));
+      }
+      await refreshData({silent:true});
+    }catch(err){ showError('Could not update: ' + (err.message || err)); }
+  }
+  async function toggleTask(id, index, checked){
+    const e = byId(id); if(!e) return;
+    const d = JSON.parse(JSON.stringify(e.data || {}));
+    d.tasks = d.tasks || [];
+    if(d.tasks[index]) d.tasks[index].done = checked;
+    try{ await patchData(id,d); await refreshData({silent:true}); }
+    catch(err){ showError('Could not update: ' + (err.message || err)); }
+  }
+
+  /* ---------- Boot ---------- */
+  buildNav();
+  </script>
+</body>
+</html>
